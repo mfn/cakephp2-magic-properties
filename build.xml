@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CakePhp2MagicProperties" default="test">
+
+  <target name="test" depends="phpunit"/>
+
+  <target name="phpunit">
+    <phpunit haltonfailure="true" haltonerror="true">
+      <formatter type="plain" usefile="false"/>
+      <batchtest>
+        <fileset dir="tests">
+          <include name="**/*Test*.php"/>
+        </fileset>
+      </batchtest>
+    </phpunit>
+  </target>
+</project>

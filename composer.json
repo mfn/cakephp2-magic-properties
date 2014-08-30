@@ -1,0 +1,39 @@
+{
+    "name": "mfn/cakephp2-magic-properties",
+    "description": "Automatically add class documentation for CakePHP2 magic properties",
+    "type": "ibrary",
+    "keywords": [
+        "cakephp2",
+        "utility"
+    ],
+    "homepage": "http://github.com/mfn/cakephp2-magic-properties",
+    "authors": [
+        {
+            "name": "Markus Fischer",
+            "email": "markus@fischer.name",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/mfn/cakephp2-magic-properties/issues"
+    },
+    "license": "MIT",
+    "require": {
+        "php": ">=5.4.0",
+        "nikic/php-parser": "1.0.x-dev",
+        "mfn/util-simpleorderedmap": "0.0.1",
+        "ulrichsg/getopt-php": "2.1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mfn\\": "lib/"
+        }
+    },
+    "bin": [
+      "bin/cakephp2_magic_properties"
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "4.2.*",
+        "phing/phing": "2.8.2"
+    }
+}

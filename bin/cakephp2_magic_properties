@@ -1,0 +1,55 @@
+#!/usr/bin/env php
+<?php
+require_once __DIR__ . '/../vendor/autoload.php';
+use Ulrichsg\Getopt\Getopt, Ulrichsg\Getopt\Option;
+
+$opts = new Getopt([
+  (new Option('h', 'help'))->setDescription('Show this help'),
+  (new Option('n', 'dry-run'))->setDescription('Run without actually modifying files'),
+  (new Option('q', 'quiet'))->setDescription('No verbose output'),
+]);
+$usage = function ($err = NULL) use ($opts) {
+  if (!empty($err)) {
+    echo 'Error: ', $err, PHP_EOL, PHP_EOL;
+  }
+  echo $opts->getHelpText();
+  exit(1);
+};
+try {
+  $opts->parse();
+  if ($opts['help']) {
+    $usage();
+  }
+} catch (\UnexpectedValueException $e) {
+  $usage($e->getMessage());
+}
+$files = $opts->getOperands();
+if (empty($files)) {
+  $usage('No files to process provided');
+}
+# minimal error2exception handler
+set_error_handler(function ($errno, $errstr, $errfile, $errline, $errcontext) {
+  $msg = "$errstr in $errfile line $errline";
+  echo "ERROR: $msg" . PHP_EOL . PHP_EOL;
+  throw new \RuntimeException($msg, $errno);
+});
+$traverser = new PhpParser\NodeTraverser();
+$visitor = new \Mfn\CakePHP2\MagicPropertyVisitor();
+$traverser->addVisitor($visitor);
+foreach ($files as $file) {
+  if (!$opts['quiet']) {
+    echo "Processing $file ..." . PHP_EOL;
+  }
+  $sourceCode = file($file);
+  $parser = new PhpParser\Parser(new PhpParser\Lexer());
+  $tree = $parser->parse(join('', $sourceCode));
+  $visitor->reset();
+  $traverser->traverse($tree);
+  $sourceCode = \Mfn\CakePhp2\MagicPropertyWriter::apply(
+    $sourceCode,
+    $visitor->getClasses()
+  );
+  if (!$opts['dry-run']) {
+    file_put_contents($file, $sourceCode);
+  }
+}
