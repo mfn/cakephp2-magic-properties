@@ -1,5 +1,8 @@
 # Parse CakePHP2 controllers source files and add magic property PHPDOC
 
+Status:
+[ ![Travis Build Status](https://travis-ci.org/mfn/cakephp2-magic-properties.svg?branch=master)](https://travis-ci.org/mfn/cakephp2-magic-properties)
+
 When working with [CakePHP2](http://cakephp.org/), dependency injection
 happens via some magic properties like `uses`, `helpers` and `components`.
 
