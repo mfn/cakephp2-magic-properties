@@ -43,6 +43,10 @@ Be aware that no checks are done whether the class is actually a CakePHP2 contro
 
 # Install
 
-Using composer: `composer.phar require mfn/cakephp2-magic-properties 0.0.5`
+Because it's using `nikic/php-parser` which as of yet has no stable release, that package has to be installed manually:
+```
+composer.phar require nikic/php-parser 1.0.0beta1@dev
+composer.phar require mfn/cakephp2-magic-properties 0.0.5
+```
 
 © Markus Fischer <markus@fischer.name>
