@@ -20,7 +20,7 @@
     "license": "MIT",
     "require": {
         "php": ">=5.4.0",
-        "nikic/php-parser": "1.0.x-dev",
+        "nikic/php-parser": "1.0.0beta1",
         "mfn/util-simpleorderedmap": "0.0.1",
         "ulrichsg/getopt-php": "2.1.0"
     },
