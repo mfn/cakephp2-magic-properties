@@ -83,10 +83,17 @@ class MagicPropertyVisitor extends NodeVisitorAbstract {
   static private function arrayExtractItems(Array_ $expr) {
     $extracted = [];
     foreach ($expr->items as $item) {
-      if (!($item->value instanceof String)) {
+      # Components can either be listed by their names (have a value in the hash)
+      if (NULL === $item->key && $item->value instanceof String) {
+        $extracted[] = $item->value->value;
         continue;
       }
-      $extracted[] = $item->value->value;
+      # or can have configuration by which the name is in the key and the
+      # value is a configuration
+      if ($item->key instanceof String && $item->value instanceof Array_) {
+        $extracted[] = $item->key->value;
+        continue;
+      }
     }
     return $extracted;
   }
