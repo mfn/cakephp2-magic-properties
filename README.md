@@ -39,6 +39,6 @@ Note: no checks are done whether the class is actually a CakePHP2 controller or 
 
 # Install
 
-Using composer: `composer.phar require mfn/cakephp2-magic-properties 0.0.1`
+Using composer: `composer.phar require mfn/cakephp2-magic-properties 0.0.2`
 
 © Markus Fischer <markus@fischer.name>
