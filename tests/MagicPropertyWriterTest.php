@@ -53,7 +53,7 @@ class MagicPropertyWriterTest extends \PHPUnit_Framework_TestCase {
     $actual = MagicPropertyWriter::splitStringIntoLines(
       "");
     $expected = [];
-    $this->assertEquals($expected, $actual);
+    $this->assertSame($expected, $actual);
   }
 
   /**
@@ -64,7 +64,7 @@ class MagicPropertyWriterTest extends \PHPUnit_Framework_TestCase {
     $actual = MagicPropertyWriter::splitStringIntoLines(
       "line1");
     $expected = [];
-    $this->assertEquals($expected, $actual);
+    $this->assertSame($expected, $actual);
   }
 
   /**
@@ -75,27 +75,27 @@ class MagicPropertyWriterTest extends \PHPUnit_Framework_TestCase {
     $actual = MagicPropertyWriter::splitStringIntoLines(
       "line1\n");
     $expected = [];
-    $this->assertEquals($expected, $actual);
+    $this->assertSame($expected, $actual);
   }
 
   public function testString2LinesTwoLinesNoEnd() {
     $actual = MagicPropertyWriter::splitStringIntoLines(
       "line1\nline2");
     $expected = ["line1\n", "line2\n"];
-    $this->assertEquals($expected, $actual);
+    $this->assertSame($expected, $actual);
   }
 
   public function testString2LinesTwoLinesWithEnd() {
     $actual = MagicPropertyWriter::splitStringIntoLines(
       "line1\nline2\n");
     $expected = ["line1\n", "line2\n"];
-    $this->assertEquals($expected, $actual);
+    $this->assertSame($expected, $actual);
   }
 
   public function testString2LinesEmptyLineMiddle() {
     $actual = MagicPropertyWriter::splitStringIntoLines(
       "line1\n\nline2\n");
     $expected = ["line1\n", "\n", "line2\n"];
-    $this->assertEquals($expected, $actual);
+    $this->assertSame($expected, $actual);
   }
 }

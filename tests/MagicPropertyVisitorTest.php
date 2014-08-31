@@ -69,7 +69,7 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       $sourceIn,
       $this->visitor->getClasses()
     );
-    $this->assertEquals($sourceOutExpected, $sourceOutActual);
+    $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
 
   public function testWriterHelper() {
@@ -95,7 +95,7 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       $sourceIn,
       $this->visitor->getClasses()
     );
-    $this->assertEquals($sourceOutExpected, $sourceOutActual);
+    $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
 
   public function testWriterComponents() {
@@ -121,7 +121,7 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       $sourceIn,
       $this->visitor->getClasses()
     );
-    $this->assertEquals($sourceOutExpected, $sourceOutActual);
+    $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
 
   public function testWriterSelectedProperties() {
@@ -151,7 +151,7 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       $this->visitor->getClasses(),
       ['helpers']
     );
-    $this->assertEquals($sourceOutExpected, $sourceOutActual);
+    $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
 
   public function testWriterComponentsWithConfig() {
@@ -177,6 +177,6 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       $sourceIn,
       $this->visitor->getClasses()
     );
-    $this->assertEquals($sourceOutExpected, $sourceOutActual);
+    $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
 }
