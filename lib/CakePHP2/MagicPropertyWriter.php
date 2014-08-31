@@ -62,13 +62,22 @@ EOF;
    *                    command, i.e. every line includes the EOL.
    * @param SimpleOrderedMap $classes Mapping of classes to the collected
    *                                  property information
+   * @param string[] $properties Optional: Name the properties to write to the
+   *  PHPDOC in in this class; see MagicPropertyVisitor::$specialProperties
+   *  for available names. By default all recognized properties will be
+   *  processed. This may not be always desirable. Controllers e.g. don't
+   *  have the $helpers property injected into themselves.
    * @throws MagicPropertyException
    * @throws SimpleOrderedMapException
    * @return array Returns the possible modified PHP source code.
    */
-  static public function apply(array $code, SimpleOrderedMap $classes) {
+  static public function apply(array $code, SimpleOrderedMap $classes,
+                               array $properties = []) {
     if (empty($code)) {
       return $code; # nothing to do
+    }
+    if (empty($properties)) {
+      $properties = MagicPropertyVisitor::$specialProperties;
     }
     $insertions = []; # record at which line what kind of insertions will happen
     /** @var Class_ $class */
@@ -110,10 +119,13 @@ EOF;
       $docIndent .= ' '; # extra space for slash
       # Go through the parsed properties and add them to the phpdoc if they
       # can't be found
-      $properties = $classes->get($class);
+      $currentProperties = $classes->get($class);
       /** @var Property $property */
-      foreach ($properties->keys() as $property) {
-        $symbols = $properties->get($property);
+      foreach ($currentProperties->keys() as $property) {
+        $symbols = $currentProperties->get($property);
+        if (!in_array($property->name, $properties)) {
+          continue;
+        }
         switch ($property->name) {
           case 'components':
             foreach ($symbols as $symbol) {

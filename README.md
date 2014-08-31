@@ -14,7 +14,9 @@ This code uses the excellent [PhpParser library](https://github.com/nikic/PHP-Pa
 
 # Usage
 
-`cakephp2_magic_properties app/Controller/AppController.php`
+`cakephp2_magic_properties --controller app/Controller/*Controller.php`
+or
+`cakephp2_magic_properties --helper app/View/Helper/*HElper.php`
 
 It will convert:
 ```PHP
@@ -35,10 +37,12 @@ AppController extends Controller {
 }
 ```
 
-Note: no checks are done whether the class is actually a CakePHP2 controller or not.
+See the `--help` flag for other options.
+
+Be aware that no checks are done whether the class is actually a CakePHP2 controller/helper or not.
 
 # Install
 
-Using composer: `composer.phar require mfn/cakephp2-magic-properties 0.0.3`
+Using composer: `composer.phar require mfn/cakephp2-magic-properties 0.0.4`
 
 © Markus Fischer <markus@fischer.name>

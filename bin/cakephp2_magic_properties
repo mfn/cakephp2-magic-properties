@@ -4,9 +4,16 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Ulrichsg\Getopt\Getopt, Ulrichsg\Getopt\Option;
 
 $opts = new Getopt([
-  (new Option('h', 'help'))->setDescription('Show this help'),
-  (new Option('n', 'dry-run'))->setDescription('Run without actually modifying files'),
-  (new Option('q', 'quiet'))->setDescription('No verbose output'),
+  (new Option('h', 'help'))
+    ->setDescription('Show this help'),
+  (new Option('n', 'dry-run'))
+    ->setDescription('Run without actually modifying files'),
+  (new Option('q', 'quiet'))
+    ->setDescription('No verbose output'),
+  (new Option('c', 'controller'))
+    ->setDescription('Expect all source files to be controller'),
+  (new Option(NULL, 'helper'))
+    ->setDescription('Expect all source files to be view helper'),
 ]);
 $usage = function ($err = NULL) use ($opts) {
   if (!empty($err)) {
@@ -22,6 +29,21 @@ try {
   }
 } catch (\UnexpectedValueException $e) {
   $usage($e->getMessage());
+}
+if (!$opts['controller'] && !$opts['helper']) {
+  $usage('Either the --controller or the --helper flag must be given');
+}
+if ($opts['controller'] && $opts['helper']) {
+  $usage('Onlyone of --controller or --helper may be given');
+}
+$properties = [];
+if ($opts['controller']) {
+  $properties = ['components', 'uses'];
+} else if ($opts['helper']) {
+  $properties = ['helpers'];
+} else {
+  $usage('Unexpected flag state; this is an error.' . PHP_EOL .
+    'Please report this to the developer including full command line.');
 }
 $files = $opts->getOperands();
 if (empty($files)) {
@@ -47,7 +69,8 @@ foreach ($files as $file) {
   $traverser->traverse($tree);
   $sourceCode = \Mfn\CakePhp2\MagicPropertyWriter::apply(
     $sourceCode,
-    $visitor->getClasses()
+    $visitor->getClasses(),
+    $properties
   );
   if (!$opts['dry-run']) {
     file_put_contents($file, $sourceCode);

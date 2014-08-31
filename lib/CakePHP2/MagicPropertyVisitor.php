@@ -23,7 +23,7 @@ class MagicPropertyVisitor extends NodeVisitorAbstract {
    * Special properties used by CakePHP2
    * @var string[]
    */
-  private static $specialProperties = [
+  public static $specialProperties = [
     'components',
     'helpers',
     'uses',

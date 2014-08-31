@@ -123,4 +123,33 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
     );
     $this->assertEquals($sourceOutExpected, $sourceOutActual);
   }
+  public function testWriterSelectedProperties() {
+    $sourceIn = [
+      '<?php' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $uses = ["Ranger"];' . PHP_EOL,
+      '  var $helpers = ["Rick"];' . PHP_EOL,
+      '  var $components = ["Kansas"];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $sourceOutExpected = [
+      '<?php' . PHP_EOL,
+      '/**' . PHP_EOL,
+      ' * @property RickHelper $Rick' . PHP_EOL,
+      ' */' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $uses = ["Ranger"];' . PHP_EOL,
+      '  var $helpers = ["Rick"];' . PHP_EOL,
+      '  var $components = ["Kansas"];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $tree = $this->parser->parse(join('', $sourceIn));
+    $this->traverser->traverse($tree);
+    $sourceOutActual = MagicPropertyWriter::apply(
+      $sourceIn,
+      $this->visitor->getClasses(),
+      ['helpers']
+    );
+    $this->assertEquals($sourceOutExpected, $sourceOutActual);
+  }
 }
