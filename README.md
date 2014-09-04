@@ -49,7 +49,7 @@ composer.phar require nikic/php-parser 1.0.0beta1@dev
 composer.phar require mfn/cakephp2-magic-properties 0.0.5
 ```
 
-= TODOs / Ideas
+# TODOs / Ideas
 - Sync properties. I.e. if a '@property' exists in PHPDOC but is not present anymore in the class, remove it.<br>Needs to be considered carefully, because there may be other magic properties documented with reasons the script wouldn't know about.
 - Remove the need to tell if we're processing Controllers, Helpers, etc. The script should be able to figure this out on its own.
 - Support for Tests?
