@@ -18,7 +18,7 @@ use PhpParser\NodeVisitorAbstract;
  *
  * @author Markus Fischer <markus@fischer.name>
  */
-class Visitor extends NodeVisitorAbstract {
+class PropertyVisitor extends NodeVisitorAbstract {
   /**
    * Special properties used by CakePHP2
    * @var string[]

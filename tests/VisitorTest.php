@@ -34,14 +34,14 @@ use PhpParser\Parser;
 class VisitorTest extends \PHPUnit_Framework_TestCase {
   /** @var NodeTraverser $traverser */
   private $traverser = NULL;
-  /** @var Visitor $visitor */
+  /** @var PropertyVisitor $visitor */
   private $visitor = NULL;
   /** @var Parser $parser */
   private $parser = NULL;
 
   protected function setUp() {
     $this->traverser = new NodeTraverser();
-    $this->visitor = new Visitor();
+    $this->visitor = new PropertyVisitor();
     $this->traverser->addVisitor($this->visitor);
     $this->parser = new Parser(new Lexer());
   }

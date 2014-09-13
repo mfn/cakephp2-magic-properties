@@ -63,7 +63,7 @@ EOF;
    * @param SimpleOrderedMap $classes Mapping of classes to the collected
    *                                  property information
    * @param string[] $properties Optional: Name the properties to write to the
-   *  PHPDOC in in this class; see Visitor::$specialProperties
+   *  PHPDOC in in this class; see PropertyVisitor::$specialProperties
    *  for available names. By default all recognized properties will be
    *  processed. This may not be always desirable. Controllers e.g. don't
    *  have the $helpers property injected into themselves.
@@ -77,7 +77,7 @@ EOF;
       return $code; # nothing to do
     }
     if (empty($properties)) {
-      $properties = Visitor::$specialProperties;
+      $properties = PropertyVisitor::$specialProperties;
     }
     $insertions = []; # record at which line what kind of insertions will happen
     /** @var Class_ $class */
