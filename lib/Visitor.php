@@ -1,5 +1,5 @@
 <?php
-namespace Mfn\CakePHP2;
+namespace Mfn\CakePHP2\MagicProperty;
 
 use Mfn\Util\SimpleOrderedMap;
 use PhpParser\Node;
@@ -18,7 +18,7 @@ use PhpParser\NodeVisitorAbstract;
  *
  * @author Markus Fischer <markus@fischer.name>
  */
-class MagicPropertyVisitor extends NodeVisitorAbstract {
+class Visitor extends NodeVisitorAbstract {
   /**
    * Special properties used by CakePHP2
    * @var string[]
@@ -50,7 +50,7 @@ class MagicPropertyVisitor extends NodeVisitorAbstract {
       return;
     }
     if ($this->classes->exists($node)) {
-      throw new MagicPropertyException(
+      throw new Exception(
         "Class {$node->name} already encountered");
     }
     $properties = new SimpleOrderedMap;
@@ -63,7 +63,7 @@ class MagicPropertyVisitor extends NodeVisitorAbstract {
           continue;
         }
         if ($properties->exists($prop)) {
-          throw new MagicPropertyException(
+          throw new Exception(
             "Property {$prop->name} already exists");
         }
         if (!($prop->default instanceof Array_)) {

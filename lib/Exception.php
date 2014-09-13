@@ -22,8 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-namespace Mfn\CakePHP2;
+namespace Mfn\CakePHP2\MagicProperty;
 /**
  * @author Markus Fischer <markus@fischer.name>
  */
-class MagicPropertyException extends \Exception {}
+class Exception extends \Exception {}

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-namespace Mfn\CakePHP2;
+namespace Mfn\CakePHP2\MagicProperty;
 
 use PhpParser\Lexer;
 use PhpParser\NodeTraverser;
@@ -31,17 +31,17 @@ use PhpParser\Parser;
 /**
  * @author Markus Fischer <markus@fischer.name>
  */
-class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
+class VisitorTest extends \PHPUnit_Framework_TestCase {
   /** @var NodeTraverser $traverser */
   private $traverser = NULL;
-  /** @var MagicPropertyVisitor $visitor */
+  /** @var Visitor $visitor */
   private $visitor = NULL;
   /** @var Parser $parser */
   private $parser = NULL;
 
   protected function setUp() {
     $this->traverser = new NodeTraverser();
-    $this->visitor = new MagicPropertyVisitor();
+    $this->visitor = new Visitor();
     $this->traverser->addVisitor($this->visitor);
     $this->parser = new Parser(new Lexer());
   }
@@ -65,7 +65,7 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
     ];
     $tree = $this->parser->parse(join('', $sourceIn));
     $this->traverser->traverse($tree);
-    $sourceOutActual = MagicPropertyWriter::apply(
+    $sourceOutActual = Writer::apply(
       $sourceIn,
       $this->visitor->getClasses()
     );
@@ -91,7 +91,7 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
     ];
     $tree = $this->parser->parse(join('', $sourceIn));
     $this->traverser->traverse($tree);
-    $sourceOutActual = MagicPropertyWriter::apply(
+    $sourceOutActual = Writer::apply(
       $sourceIn,
       $this->visitor->getClasses()
     );
@@ -117,7 +117,7 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
     ];
     $tree = $this->parser->parse(join('', $sourceIn));
     $this->traverser->traverse($tree);
-    $sourceOutActual = MagicPropertyWriter::apply(
+    $sourceOutActual = Writer::apply(
       $sourceIn,
       $this->visitor->getClasses()
     );
@@ -146,7 +146,7 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
     ];
     $tree = $this->parser->parse(join('', $sourceIn));
     $this->traverser->traverse($tree);
-    $sourceOutActual = MagicPropertyWriter::apply(
+    $sourceOutActual = Writer::apply(
       $sourceIn,
       $this->visitor->getClasses(),
       ['helpers']
@@ -173,7 +173,7 @@ class MagicPropertyVisitorTest extends \PHPUnit_Framework_TestCase {
     ];
     $tree = $this->parser->parse(join('', $sourceIn));
     $this->traverser->traverse($tree);
-    $sourceOutActual = MagicPropertyWriter::apply(
+    $sourceOutActual = Writer::apply(
       $sourceIn,
       $this->visitor->getClasses()
     );

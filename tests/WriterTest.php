@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-namespace Mfn\CakePHP2;
+namespace Mfn\CakePHP2\MagicProperty;
 
 use PhpParser\Lexer;
 use PhpParser\NodeTraverser;
@@ -31,69 +31,69 @@ use PhpParser\Parser;
 /**
  * @author Markus Fischer <markus@fischer.name>
  */
-class MagicPropertyWriterTest extends \PHPUnit_Framework_TestCase {
+class WriterTest extends \PHPUnit_Framework_TestCase {
   /** @var NodeTraverser $traverser */
   private $traverser = NULL;
-  /** @var MagicPropertyVisitor $visitor */
+  /** @var Visitor $visitor */
   private $visitor = NULL;
   /** @var Parser $parser */
   private $parser = NULL;
 
   protected function setUp() {
     $this->traverser = new NodeTraverser();
-    $this->visitor = new MagicPropertyVisitor();
+    $this->visitor = new Visitor();
     $this->parser = new Parser(new Lexer());
   }
 
   /**
-   * @expectedException \Mfn\CakePHP2\MagicPropertyException
+   * @expectedException \Mfn\CakePHP2\MagicProperty\Exception
    * @expectedExceptionMessage Expected at least two lines, none found
    */
   public function testString2LinesEmpty() {
-    $actual = MagicPropertyWriter::splitStringIntoLines(
+    $actual = Writer::splitStringIntoLines(
       "");
     $expected = [];
     $this->assertSame($expected, $actual);
   }
 
   /**
-   * @expectedException \Mfn\CakePHP2\MagicPropertyException
+   * @expectedException \Mfn\CakePHP2\MagicProperty\Exception
    * @expectedExceptionMessage Expected at least two lines, only one found
    */
   public function testString2LinesLineNoEnd() {
-    $actual = MagicPropertyWriter::splitStringIntoLines(
+    $actual = Writer::splitStringIntoLines(
       "line1");
     $expected = [];
     $this->assertSame($expected, $actual);
   }
 
   /**
-   * @expectedException \Mfn\CakePHP2\MagicPropertyException
+   * @expectedException \Mfn\CakePHP2\MagicProperty\Exception
    * @expectedExceptionMessage Expected at least two lines, only one found
    */
   public function testString2LinesLineWithEnd() {
-    $actual = MagicPropertyWriter::splitStringIntoLines(
+    $actual = Writer::splitStringIntoLines(
       "line1\n");
     $expected = [];
     $this->assertSame($expected, $actual);
   }
 
   public function testString2LinesTwoLinesNoEnd() {
-    $actual = MagicPropertyWriter::splitStringIntoLines(
+    $actual = Writer::splitStringIntoLines(
       "line1\nline2");
     $expected = ["line1\n", "line2\n"];
     $this->assertSame($expected, $actual);
   }
 
   public function testString2LinesTwoLinesWithEnd() {
-    $actual = MagicPropertyWriter::splitStringIntoLines(
+    $actual = Writer::splitStringIntoLines(
       "line1\nline2\n");
     $expected = ["line1\n", "line2\n"];
     $this->assertSame($expected, $actual);
   }
 
   public function testString2LinesEmptyLineMiddle() {
-    $actual = MagicPropertyWriter::splitStringIntoLines(
+    $actual = Writer::splitStringIntoLines(
       "line1\n\nline2\n");
     $expected = ["line1\n", "\n", "line2\n"];
     $this->assertSame($expected, $actual);

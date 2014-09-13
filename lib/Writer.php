@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-namespace Mfn\CakePHP2;
+namespace Mfn\CakePHP2\MagicProperty;
 
 use Mfn\Util\SimpleOrderedMap;
 use Mfn\Util\SimpleOrderedMapException;
@@ -34,7 +34,7 @@ use PhpParser\Node\Stmt\Property;
  * @see MagicPropertyWriter::apply()
  * @author Markus Fischer <markus@fischer.name>
  */
-class MagicPropertyWriter {
+class Writer {
   /**
    * Includes extra empty line for space -> deliberately!
    */
@@ -63,11 +63,11 @@ EOF;
    * @param SimpleOrderedMap $classes Mapping of classes to the collected
    *                                  property information
    * @param string[] $properties Optional: Name the properties to write to the
-   *  PHPDOC in in this class; see MagicPropertyVisitor::$specialProperties
+   *  PHPDOC in in this class; see Visitor::$specialProperties
    *  for available names. By default all recognized properties will be
    *  processed. This may not be always desirable. Controllers e.g. don't
    *  have the $helpers property injected into themselves.
-   * @throws MagicPropertyException
+   * @throws Exception
    * @throws SimpleOrderedMapException
    * @return array Returns the possible modified PHP source code.
    */
@@ -77,7 +77,7 @@ EOF;
       return $code; # nothing to do
     }
     if (empty($properties)) {
-      $properties = MagicPropertyVisitor::$specialProperties;
+      $properties = Visitor::$specialProperties;
     }
     $insertions = []; # record at which line what kind of insertions will happen
     /** @var Class_ $class */
@@ -164,7 +164,7 @@ EOF;
             }
             break;
           default:
-            throw new MagicPropertyException(
+            throw new Exception(
               "Unknown special propert '{$property->name}'");
         }
       }
@@ -248,17 +248,17 @@ EOF;
    * Additional work is done to ensure there's finished EOL.
    *
    * @param $str
-   * @throws MagicPropertyException
+   * @throws Exception
    * @return array
    */
   static public function splitStringIntoLines($str) {
     $lines = preg_split("/(\R)/", $str, -1, PREG_SPLIT_DELIM_CAPTURE);
     if (empty($lines)) {
-      throw new MagicPropertyException(
+      throw new Exception(
         'Expected at least two lines, none found');
     }
     if (count($lines) === 1 && reset($lines) === '') {
-      throw new MagicPropertyException(
+      throw new Exception(
         'Expected at least two lines, none found');
     }
     if ('' === end($lines)) {
@@ -273,7 +273,7 @@ EOF;
     # "one\ntwo" => ["one", "\n", "two"]
     # "one\ntwo\n" => ["one", "\n", "two", "\n"]
     if (count($lines) < 3) {
-      throw new MagicPropertyException(
+      throw new Exception(
         'Expected at least two lines, only one found');
     }
     if (count($lines) % 2 !== 0) {
@@ -290,12 +290,12 @@ EOF;
   /**
    * Extract the first EOL from str
    * @param string $str
-   * @throws MagicPropertyException
+   * @throws Exception
    * @return
    */
   static private function extractEol($str) {
     if (!preg_match('/\R/', $str, $m)) {
-      throw new MagicPropertyException('Unable to extract EOL');
+      throw new Exception('Unable to extract EOL');
     }
     return $m[0];
   }
