@@ -31,20 +31,13 @@ use PhpParser\Parser;
 /**
  * @author Markus Fischer <markus@fischer.name>
  */
-class VisitorTest extends \PHPUnit_Framework_TestCase {
+class PropertyVisitorTest extends \PHPUnit_Framework_TestCase {
   /** @var NodeTraverser $traverser */
   private $traverser = NULL;
   /** @var PropertyVisitor $visitor */
   private $visitor = NULL;
   /** @var Parser $parser */
   private $parser = NULL;
-
-  protected function setUp() {
-    $this->traverser = new NodeTraverser();
-    $this->visitor = new PropertyVisitor();
-    $this->traverser->addVisitor($this->visitor);
-    $this->parser = new Parser(new Lexer());
-  }
 
   public function testWriterUses() {
     $sourceIn = [
@@ -65,7 +58,7 @@ class VisitorTest extends \PHPUnit_Framework_TestCase {
     ];
     $tree = $this->parser->parse(join('', $sourceIn));
     $this->traverser->traverse($tree);
-    $sourceOutActual = Writer::apply(
+    $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
       $this->visitor->getClasses()
     );
@@ -91,7 +84,7 @@ class VisitorTest extends \PHPUnit_Framework_TestCase {
     ];
     $tree = $this->parser->parse(join('', $sourceIn));
     $this->traverser->traverse($tree);
-    $sourceOutActual = Writer::apply(
+    $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
       $this->visitor->getClasses()
     );
@@ -117,7 +110,7 @@ class VisitorTest extends \PHPUnit_Framework_TestCase {
     ];
     $tree = $this->parser->parse(join('', $sourceIn));
     $this->traverser->traverse($tree);
-    $sourceOutActual = Writer::apply(
+    $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
       $this->visitor->getClasses()
     );
@@ -146,7 +139,7 @@ class VisitorTest extends \PHPUnit_Framework_TestCase {
     ];
     $tree = $this->parser->parse(join('', $sourceIn));
     $this->traverser->traverse($tree);
-    $sourceOutActual = Writer::apply(
+    $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
       $this->visitor->getClasses(),
       ['helpers']
@@ -173,10 +166,17 @@ class VisitorTest extends \PHPUnit_Framework_TestCase {
     ];
     $tree = $this->parser->parse(join('', $sourceIn));
     $this->traverser->traverse($tree);
-    $sourceOutActual = Writer::apply(
+    $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
       $this->visitor->getClasses()
     );
     $this->assertSame($sourceOutExpected, $sourceOutActual);
+  }
+
+  protected function setUp() {
+    $this->traverser = new NodeTraverser();
+    $this->visitor = new PropertyVisitor();
+    $this->traverser->addVisitor($this->visitor);
+    $this->parser = new Parser(new Lexer());
   }
 }

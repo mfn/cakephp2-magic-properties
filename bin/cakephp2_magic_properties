@@ -1,8 +1,21 @@
 #!/usr/bin/env php
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
-use Ulrichsg\Getopt\Getopt, Ulrichsg\Getopt\Option;
-
+use Mfn\CakePHP2\MagicProperty\ClassVisitor;
+use Mfn\CakePHP2\MagicProperty\PropertyVisitor;
+use Mfn\CakePHP2\MagicProperty\ClassTransformer;
+use PhpParser\Lexer;
+use PhpParser\NodeTraverser;
+use PhpParser\Parser;
+use Ulrichsg\Getopt\Getopt;
+use Ulrichsg\Getopt\Option;
+ini_set('memory_limit', -1);
+# minimal error2exception handler
+set_error_handler(function ($errno, $errstr, $errfile, $errline, $errcontext) {
+  $msg = "$errstr in $errfile line $errline";
+  throw new \RuntimeException($msg, $errno);
+});
+# Setup getopt
 $opts = new Getopt([
   (new Option('h', 'help'))
     ->setDescription('Show this help'),
@@ -10,11 +23,12 @@ $opts = new Getopt([
     ->setDescription('Run without actually modifying files'),
   (new Option('q', 'quiet'))
     ->setDescription('No verbose output'),
-  (new Option('c', 'controller'))
-    ->setDescription('Expect all source files to be controller'),
-  (new Option(NULL, 'helper'))
-    ->setDescription('Expect all source files to be view helper'),
 ]);
+$opts->setBanner(
+  "Scans a CakePHP2 project and adds magic PHPDOC @property\n" .
+  "documentation for \$components, \$helpers and \$uses\n\n" .
+  "Usage: %s [options] <directories|files>\n"
+);
 $usage = function ($err = NULL) use ($opts) {
   if (!empty($err)) {
     echo 'Error: ', $err, PHP_EOL, PHP_EOL;
@@ -30,49 +44,132 @@ try {
 } catch (\UnexpectedValueException $e) {
   $usage($e->getMessage());
 }
-if (!$opts['controller'] && !$opts['helper']) {
-  $usage('Either the --controller or the --helper flag must be given');
+$operands = $opts->getOperands();
+if (count($operands) === 0) {
+  $usage('You must provide at least a file/directory to scan');
 }
-if ($opts['controller'] && $opts['helper']) {
-  $usage('Onlyone of --controller or --helper may be given');
+$fnScanDir = function($dir) {
+  $files = [];
+  $iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
+  /** @var $file SplFileInfo */
+  foreach ($iter as $file) {
+    if (!$file->isFile()) {
+      continue;
+    }
+    if ($file->getExtension() !== 'php') {
+      continue;
+    }
+    $files[] = $file->getRealPath();
+  };
+  return $files;
+};
+$files = [];
+foreach ($operands as $operand) {
+  if (is_file($operand)) {
+    $files[] = $operand;
+    continue;
+  }
+  if (is_dir($operand)) {
+    $files = array_merge($files, $fnScanDir($operand));
+  }
 }
-$properties = [];
-if ($opts['controller']) {
-  $properties = ['components', 'uses'];
-} else if ($opts['helper']) {
-  $properties = ['helpers'];
-} else {
-  $usage('Unexpected flag state; this is an error.' . PHP_EOL .
-    'Please report this to the developer including full command line.');
-}
-$files = $opts->getOperands();
-if (empty($files)) {
-  $usage('No files to process provided');
-}
-# minimal error2exception handler
-set_error_handler(function ($errno, $errstr, $errfile, $errline, $errcontext) {
-  $msg = "$errstr in $errfile line $errline";
-  echo "ERROR: $msg" . PHP_EOL . PHP_EOL;
-  throw new \RuntimeException($msg, $errno);
-});
-$traverser = new PhpParser\NodeTraverser();
-$visitor = new \Mfn\CakePHP2\MagicPropertyVisitor();
-$traverser->addVisitor($visitor);
+$files = array_unique($files);
+# start processing
+$traverser = new NodeTraverser();
+$classVisitor = new ClassVisitor();
+$traverser->addVisitor($classVisitor);
+# Store which class is in which file and whose parent it has, if
+$classes = [];
 foreach ($files as $file) {
   if (!$opts['quiet']) {
-    echo "Processing $file ..." . PHP_EOL;
+    echo "Parsing $file ..." . PHP_EOL;
   }
-  $sourceCode = file($file);
-  $parser = new PhpParser\Parser(new PhpParser\Lexer());
-  $tree = $parser->parse(join('', $sourceCode));
-  $visitor->reset();
+  $code = file($file);
+  $parser = new Parser(new Lexer());
+  $tree = $parser->parse(join('', $code));
+  $classVisitor->reset();
   $traverser->traverse($tree);
-  $sourceCode = \Mfn\CakePhp2\MagicPropertyWriter::apply(
-    $sourceCode,
-    $visitor->getClasses(),
-    $properties
-  );
-  if (!$opts['dry-run']) {
-    file_put_contents($file, $sourceCode);
+  $classesInFile = $classVisitor->getClasses();
+  foreach ($classesInFile as $class) {
+    if (!isset($class->extends)) {
+      continue;
+    }
+    if (isset($classes[$class->name])) {
+      if (!$opts['quiet']) {
+        fprintf(STDERR,
+          sprintf('Ignoring class definition of %s found in file %s:%d, first'
+            . ' found in %s:%d' . PHP_EOL,
+            $class->name,
+            $file,
+            $class->getAttribute('startLine'),
+            $classes[$class->name]['file'],
+            $classes[$class->name]['class']->getAttribute('startLine')
+          )
+        );
+      }
+      continue;
+    }
+    # Remember for next pass
+    $classes[$class->name] = [
+      'class' => $class,
+      'file' => $file,
+      'code' => $code,
+    ];
   }
+}
+$traverser->removeVisitor($classVisitor);
+$propertyVisitor = new PropertyVisitor();
+$traverser->addVisitor($propertyVisitor);
+if (empty($classes)) {
+  echo 'No classes found' . PHP_EOL;
+  exit(1);
+}
+$fnFindTopAncestor = function($className) use($classes) {
+  while (isset($classes[$className])) {
+    $className = $classes[$className]['class']->extends->toString();
+  }
+  return $className;
+};
+foreach ($classes as $className => $classData) {
+  $fileName = $classData['file'];
+  $transformedSource = NULL;
+  switch ($fnFindTopAncestor($className)) {
+    case 'Controller':
+      $propertyVisitor->reset();
+      $traverser->traverse( [ $classData['class'] ] );
+      $transformedSource = ClassTransformer::apply(
+        $classData['code'],
+        $propertyVisitor->getClasses(),
+        ['components', 'uses']
+      );
+      break;
+    case 'Helper':
+      $propertyVisitor->reset();
+      $traverser->traverse( [ $classData['class'] ] );
+      $transformedSource = ClassTransformer::apply(
+        $classData['code'],
+        $propertyVisitor->getClasses()
+      );
+      break;
+    default:
+      # ignored
+      if (!$opts['quiet']) {
+        echo "Ignoring $fileName , not a Controller or Helper" . PHP_EOL;
+      }
+      goto nextIteration;
+  }
+  if ($classData['code'] === $transformedSource) {
+    continue;
+  }
+  if ($opts['dry-run']) {
+    if (!$opts['quiet']) {
+      echo 'Dry-run, not writing changes to ' . $fileName . PHP_EOL;
+    }
+    continue;
+  }
+  if (!$opts['quiet']) {
+    echo 'Writing changes to ' . $fileName . PHP_EOL;
+  }
+  file_put_contents($fileName, $transformedSource);
+  nextIteration:
 }

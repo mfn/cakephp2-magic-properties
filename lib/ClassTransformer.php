@@ -31,10 +31,10 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Property;
 
 /**
- * @see MagicPropertyWriter::apply()
+ * @see apply()
  * @author Markus Fischer <markus@fischer.name>
  */
-class Writer {
+class ClassTransformer {
   /**
    * Includes extra empty line for space -> deliberately!
    */
@@ -97,9 +97,10 @@ EOF;
         $phpDocNumLinesInSource = count(self::splitStringIntoLines($text));
         assert(0 !== $phpDocNumLinesInSource);
       } else {
+        # No PHPDOC found, create a new one
         $default = self::DEFAULT_PHPDOC;
         # indent default phpdoc by current class indentation
-        $classLine = $code[ $class->getAttribute('startLine') - 1];
+        $classLine = $code[$class->getAttribute('startLine') - 1];
         if (preg_match(self::RE_INDENT, $classLine, $m)) {
           $docIndent = $m['indent'];
           # now prepend the indent before each line
@@ -134,7 +135,8 @@ EOF;
                 $symbol = $m['symbol'];
               }
               if (true === self::addPropertyIfNotExists($phpDoc,
-                  $symbol . 'Component', $symbol, $docIndent)) {
+                  $symbol . 'Component', $symbol, $docIndent)
+              ) {
                 $currentInsertions++;
               }
             }
@@ -146,7 +148,8 @@ EOF;
                 $symbol = $m['symbol'];
               }
               if (true === self::addPropertyIfNotExists($phpDoc,
-                  $symbol . 'Helper', $symbol, $docIndent)) {
+                  $symbol . 'Helper', $symbol, $docIndent)
+              ) {
                 $currentInsertions++;
               }
             }
@@ -157,8 +160,9 @@ EOF;
               if (preg_match('/\.(?<symbol>[^\.]+)$/', $symbol, $m)) {
                 $symbol = $m['symbol'];
               }
-              if (true ===self::addPropertyIfNotExists(
-                  $phpDoc, $symbol, $symbol, $docIndent)) {
+              if (true === self::addPropertyIfNotExists(
+                  $phpDoc, $symbol, $symbol, $docIndent)
+              ) {
                 $currentInsertions++;
               }
             }
@@ -173,10 +177,10 @@ EOF;
         continue;
       }
       # Accumulate sum of previously replaced lines to get actual line number
-      $alreadyAddedLines = array_reduce($insertions, function($carry, $item) {
+      $alreadyAddedLines = array_reduce($insertions, function ($carry, $item) {
         return $carry + $item['replaceNumLines'];
       }, 0);
-      $insertions[$phpDoc->getLine() -1 + $alreadyAddedLines] = [
+      $insertions[$phpDoc->getLine() - 1 + $alreadyAddedLines] = [
         'doc' => $phpDoc,
         'replaceNumLines' => $phpDocNumLinesInSource
       ];
@@ -211,43 +215,12 @@ EOF;
   }
 
   /**
-   * Adds the type/symbol to PHPDOC if not already present.
-   * @param Doc $phpDoc
-   * @param string $type E.g. 'Html' or 'HtmlHelper'
-   * @param string $symbol E.g. 'Html'
-   * @param string $indent  The indentation so when adding properties it matches
-   *                        general PHPDOC indentation
-   * @return boolean True if property was added, false if not
-   */
-  static private function addPropertyIfNotExists(Doc $phpDoc,
-                                                 $type, $symbol, $indent) {
-    $text = $phpDoc->getText();
-    # split into lines but ensure we keep the existing line ending format
-    $lines = self::splitStringIntoLines($text);
-    # try to find the symbol we're going to add
-    $reSymMatch = '/\*\s*@property.*' .
-      preg_quote($type, '/') . '.*' .
-      preg_quote($symbol, '/') . '/i';
-    foreach ($lines as $line) {
-      if (preg_match($reSymMatch, $line)) {
-        return false;
-      }
-    }
-    # We haven't found it, so add it at the end before the comment ends
-    $addedLine = $indent .'* @property ' . $type . ' $' . $symbol;
-    array_splice($lines, count($lines) - 1, 0,
-      [ $addedLine . self::extractEol($text) ]);
-    $phpDoc->setText(join('', $lines));
-    return true;
-  }
-
-  /**
    * Takes a string a converts it into an array where each line also contains
    * the EOL; similar like file() behaves.
    *
    * Additional work is done to ensure there's finished EOL.
    *
-   * @param $str
+   * @param string $str
    * @throws Exception
    * @return array
    */
@@ -298,5 +271,36 @@ EOF;
       throw new Exception('Unable to extract EOL');
     }
     return $m[0];
+  }
+
+  /**
+   * Adds the type/symbol to PHPDOC if not already present.
+   * @param Doc $phpDoc
+   * @param string $type E.g. 'Html' or 'HtmlHelper'
+   * @param string $symbol E.g. 'Html'
+   * @param string $indent The indentation so when adding properties it matches
+   *                        general PHPDOC indentation
+   * @return boolean True if property was added, false if not
+   */
+  static private function addPropertyIfNotExists(Doc $phpDoc,
+                                                 $type, $symbol, $indent) {
+    $text = $phpDoc->getText();
+    # split into lines but ensure we keep the existing line ending format
+    $lines = self::splitStringIntoLines($text);
+    # try to find the symbol we're going to add
+    $reSymMatch = '/\*\s*@property.*' .
+      preg_quote($type, '/') . '.*' .
+      preg_quote($symbol, '/') . '/i';
+    foreach ($lines as $line) {
+      if (preg_match($reSymMatch, $line)) {
+        return false;
+      }
+    }
+    # We haven't found it, so add it at the end before the comment ends
+    $addedLine = $indent . '* @property ' . $type . ' $' . $symbol;
+    array_splice($lines, count($lines) - 1, 0,
+      [$addedLine . self::extractEol($text)]);
+    $phpDoc->setText(join('', $lines));
+    return true;
   }
 }

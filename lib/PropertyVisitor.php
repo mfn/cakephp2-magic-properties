@@ -12,9 +12,11 @@ use PhpParser\NodeVisitorAbstract;
 /**
  * A visitor for PhpParser\NodeTraverser
  *
- * Visits every class and collects all properties documented in
- * in self::$specialProperties . It expects those properties to be array of
- * strings.
+ * Extracts all properties from all classes from \PhpParser\NodeTraverser .
+ *
+ * Use getClasses() to retrieve a mapping of class to property matching.
+ *
+ * Use reset() to re-use this visitor.
  *
  * @author Markus Fischer <markus@fischer.name>
  */

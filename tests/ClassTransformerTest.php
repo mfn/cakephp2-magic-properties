@@ -31,7 +31,7 @@ use PhpParser\Parser;
 /**
  * @author Markus Fischer <markus@fischer.name>
  */
-class WriterTest extends \PHPUnit_Framework_TestCase {
+class ClassTransformerTest extends \PHPUnit_Framework_TestCase {
   /** @var NodeTraverser $traverser */
   private $traverser = NULL;
   /** @var PropertyVisitor $visitor */
@@ -39,18 +39,12 @@ class WriterTest extends \PHPUnit_Framework_TestCase {
   /** @var Parser $parser */
   private $parser = NULL;
 
-  protected function setUp() {
-    $this->traverser = new NodeTraverser();
-    $this->visitor = new PropertyVisitor();
-    $this->parser = new Parser(new Lexer());
-  }
-
   /**
    * @expectedException \Mfn\CakePHP2\MagicProperty\Exception
    * @expectedExceptionMessage Expected at least two lines, none found
    */
   public function testString2LinesEmpty() {
-    $actual = Writer::splitStringIntoLines(
+    $actual = ClassTransformer::splitStringIntoLines(
       "");
     $expected = [];
     $this->assertSame($expected, $actual);
@@ -61,7 +55,7 @@ class WriterTest extends \PHPUnit_Framework_TestCase {
    * @expectedExceptionMessage Expected at least two lines, only one found
    */
   public function testString2LinesLineNoEnd() {
-    $actual = Writer::splitStringIntoLines(
+    $actual = ClassTransformer::splitStringIntoLines(
       "line1");
     $expected = [];
     $this->assertSame($expected, $actual);
@@ -72,30 +66,36 @@ class WriterTest extends \PHPUnit_Framework_TestCase {
    * @expectedExceptionMessage Expected at least two lines, only one found
    */
   public function testString2LinesLineWithEnd() {
-    $actual = Writer::splitStringIntoLines(
+    $actual = ClassTransformer::splitStringIntoLines(
       "line1\n");
     $expected = [];
     $this->assertSame($expected, $actual);
   }
 
   public function testString2LinesTwoLinesNoEnd() {
-    $actual = Writer::splitStringIntoLines(
+    $actual = ClassTransformer::splitStringIntoLines(
       "line1\nline2");
     $expected = ["line1\n", "line2\n"];
     $this->assertSame($expected, $actual);
   }
 
   public function testString2LinesTwoLinesWithEnd() {
-    $actual = Writer::splitStringIntoLines(
+    $actual = ClassTransformer::splitStringIntoLines(
       "line1\nline2\n");
     $expected = ["line1\n", "line2\n"];
     $this->assertSame($expected, $actual);
   }
 
   public function testString2LinesEmptyLineMiddle() {
-    $actual = Writer::splitStringIntoLines(
+    $actual = ClassTransformer::splitStringIntoLines(
       "line1\n\nline2\n");
     $expected = ["line1\n", "\n", "line2\n"];
     $this->assertSame($expected, $actual);
+  }
+
+  protected function setUp() {
+    $this->traverser = new NodeTraverser();
+    $this->visitor = new ClassVisitor();
+    $this->parser = new Parser(new Lexer());
   }
 }
