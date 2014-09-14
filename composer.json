@@ -20,9 +20,9 @@
     "license": "MIT",
     "require": {
         "php": ">=5.4.0",
-        "nikic/php-parser": "1.0.0beta1@dev",
+        "nikic/php-parser": "1.0.0",
         "mfn/util-simpleorderedmap": "0.0.1",
-        "ulrichsg/getopt-php": "2.1.0"
+        "ulrichsg/getopt-php": "2.2.0"
     },
     "autoload": {
         "psr-4": {
