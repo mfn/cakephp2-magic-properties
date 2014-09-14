@@ -157,6 +157,16 @@ foreach ($classes as $className => $classData) {
         $removeProperties
       );
       break;
+    case 'Shell':
+      $propertyVisitor->reset();
+      $traverser->traverse( [ $classData['class'] ] );
+      $transformedSource = ClassTransformer::apply(
+        $classData['code'],
+        $propertyVisitor->getClasses(),
+        ['uses'],
+        $removeProperties
+      );
+      break;
     default:
       # ignored
       if (!$opts['quiet']) {

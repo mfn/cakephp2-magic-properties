@@ -67,7 +67,7 @@ See the `--help` flag for other options. The library is designed to act idempote
 # Install
 
 ```
-composer.phar require mfn/cakephp2-magic-properties 0.0.6
+composer.phar require mfn/cakephp2-magic-properties 0.0.7
 ```
 
 # TODOs / Ideas

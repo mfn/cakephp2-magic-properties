@@ -1,5 +1,9 @@
 # CakePHP2 magic properties CHANGELOG
 
+### 0.0.7 - 14th September 2014
+- Added
+  - Support for models in shells
+
 ### 0.0.6 - 14th September 2014
 - Changed
   - Changed namespace and shuffled file layout to reduce unneccesary directory layers
