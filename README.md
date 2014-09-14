@@ -66,10 +66,8 @@ See the `--help` flag for other options. The library is designed to act idempote
 
 # Install
 
-Because it's using `nikic/php-parser` which as of yet has no stable release, that package has to be installed manually:
 ```
-composer.phar require nikic/php-parser 1.0.0beta1@dev
-composer.phar require mfn/cakephp2-magic-properties 0.0.5
+composer.phar require mfn/cakephp2-magic-properties 0.0.6
 ```
 
 # TODOs / Ideas
