@@ -1,5 +1,13 @@
 # CakePHP2 magic properties CHANGELOG
 
+### 0.0.6 - 14th September 2014
+- Changed
+  - Changed namespace and shuffled file layout to reduce unneccesary directory layers
+  - Rewrote algorithm to automatically detect Controller/Helper classes
+  - Upgraded php-parser (stable version) and getopt-php (custom banner support)
+- Added
+  - Flag `--remove` which removes all existing `@property` before syncing with special properties
+
 ### 0.0.5 - 31th August 2014
 - Added
   - Support components with configurations
