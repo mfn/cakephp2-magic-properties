@@ -23,6 +23,8 @@ $opts = new Getopt([
     ->setDescription('Run without actually modifying files'),
   (new Option('q', 'quiet'))
     ->setDescription('No verbose output'),
+  (new Option('r', 'remove'))
+    ->setDescription('Remove non-existent properties. Warning: this removes all unknown properties!')
 ]);
 $opts->setBanner(
   "Scans a CakePHP2 project and adds magic PHPDOC @property\n" .
@@ -44,6 +46,7 @@ try {
 } catch (\UnexpectedValueException $e) {
   $usage($e->getMessage());
 }
+$removeProperties = (bool) $opts['remove'];
 $operands = $opts->getOperands();
 if (count($operands) === 0) {
   $usage('You must provide at least a file/directory to scan');
@@ -140,7 +143,8 @@ foreach ($classes as $className => $classData) {
       $transformedSource = ClassTransformer::apply(
         $classData['code'],
         $propertyVisitor->getClasses(),
-        ['components', 'uses']
+        ['components', 'uses'],
+        $removeProperties
       );
       break;
     case 'Helper':
@@ -148,7 +152,9 @@ foreach ($classes as $className => $classData) {
       $traverser->traverse( [ $classData['class'] ] );
       $transformedSource = ClassTransformer::apply(
         $classData['code'],
-        $propertyVisitor->getClasses()
+        $propertyVisitor->getClasses(),
+        [],
+        $removeProperties
       );
       break;
     default:

@@ -173,6 +173,69 @@ class PropertyVisitorTest extends \PHPUnit_Framework_TestCase {
     $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
 
+  public function testTransformerRemove() {
+    $sourceIn = [
+      '<?php' . PHP_EOL,
+      '/**' . PHP_EOL,
+      ' * @property Bar $Bar' . PHP_EOL,
+      ' * @property Foo $Foo' . PHP_EOL,
+      ' */' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $uses = ["Bar"];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $sourceOutExpected = [
+      '<?php' . PHP_EOL,
+      '/**' . PHP_EOL,
+      ' * @property Bar $Bar' . PHP_EOL,
+      ' */' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $uses = ["Bar"];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $tree = $this->parser->parse(join('', $sourceIn));
+    $this->traverser->traverse($tree);
+    $sourceOutActual = ClassTransformer::apply(
+      $sourceIn,
+      $this->visitor->getClasses(),
+      [],
+      true
+    );
+    $this->assertSame($sourceOutExpected, $sourceOutActual);
+  }
+
+  public function testTransformerReorderWithRemove() {
+    $sourceIn = [
+      '<?php' . PHP_EOL,
+      '/**' . PHP_EOL,
+      ' * @property Foo $Foo' . PHP_EOL,
+      ' * @property Bar $Bar' . PHP_EOL,
+      ' */' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $uses = ["Foo", "Bar"];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $sourceOutExpected = [
+      '<?php' . PHP_EOL,
+      '/**' . PHP_EOL,
+      ' * @property Bar $Bar' . PHP_EOL,
+      ' * @property Foo $Foo' . PHP_EOL,
+      ' */' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $uses = ["Foo", "Bar"];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $tree = $this->parser->parse(join('', $sourceIn));
+    $this->traverser->traverse($tree);
+    $sourceOutActual = ClassTransformer::apply(
+      $sourceIn,
+      $this->visitor->getClasses(),
+      [],
+      true
+    );
+    $this->assertSame($sourceOutExpected, $sourceOutActual);
+  }
+
   protected function setUp() {
     $this->traverser = new NodeTraverser();
     $this->visitor = new PropertyVisitor();

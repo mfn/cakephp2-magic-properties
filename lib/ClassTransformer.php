@@ -67,12 +67,15 @@ EOF;
    *  for available names. By default all recognized properties will be
    *  processed. This may not be always desirable. Controllers e.g. don't
    *  have the $helpers property injected into themselves.
+   * @param bool $removeUnknownProperties Removes all other properties (first)
+   *                                      and then adds the found ones.
    * @throws Exception
    * @throws SimpleOrderedMapException
    * @return array Returns the possible modified PHP source code.
    */
   static public function apply(array $code, SimpleOrderedMap $classes,
-                               array $properties = []) {
+                               array $properties = [],
+                               $removeUnknownProperties = false) {
     if (empty($code)) {
       return $code; # nothing to do
     }
@@ -94,7 +97,18 @@ EOF;
         if (preg_match(self::RE_INDENT, $text, $m)) {
           $docIndent = $m['indent'];
         }
-        $phpDocNumLinesInSource = count(self::splitStringIntoLines($text));
+        $lines = self::splitStringIntoLines($text);
+        $phpDocNumLinesInSource = count($lines);
+        if ($removeUnknownProperties) {
+          # Remove every line already containing a @property statement
+          foreach ($lines as $i => $line) {
+            if (false !== strpos($line, '@property')) {
+              unset($lines[$i]);
+            }
+          }
+          $lines = array_values($lines); # ensure no gaps in indices
+          $phpDoc->setText(join('', $lines));
+        }
         assert(0 !== $phpDocNumLinesInSource);
       } else {
         # No PHPDOC found, create a new one

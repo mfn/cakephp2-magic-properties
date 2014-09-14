@@ -41,6 +41,27 @@ AppController extends Controller {
 }
 ```
 
+By default, existing properties will not be touched but care is taken to not create duplicates. If however you want to remove all existing `@property` documentation, use the `--remove` flag `cakephp2_magic_properties --remove ../path/to/your/app/`:
+```PHP
+/**
+ * @property BarComponent $Bar
+ * @property Foo $Foo
+ */
+AppController extends Controller {
+  $component = ['Bar'];
+}
+```
+into
+```PHP
+/**
+ * @property BarComponent $Bar
+ */
+AppController extends Controller {
+  $component = ['Bar'];
+}
+```
+However it may also cause to re-order your existing properties if none have really changed (because interally first all properties are always removed).
+
 See the `--help` flag for other options. The library is designed to act idempotent.
 
 # Install
@@ -52,7 +73,6 @@ composer.phar require mfn/cakephp2-magic-properties 0.0.5
 ```
 
 # TODOs / Ideas
-- Sync properties. I.e. if a '@property' exists in PHPDOC but is not present anymore in the class, remove it.<br>Needs to be considered carefully, because there may be other magic properties documented with reasons the script wouldn't know about.
 - Support for Tests?
 - Ensure we're working with multi-line php doc comment, otherwise treat as there is none
 
