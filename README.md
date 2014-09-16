@@ -64,7 +64,11 @@ However it may also cause to re-order your existing properties if none have real
 
 See the `--help` flag for other options. The library is designed to act idempotent.
 
-# Install
+# Requirements
+
+- PHP 5.4 (tested with at least 5.4.24)
+
+# Installation
 
 ```
 composer.phar require mfn/cakephp2-magic-properties 0.0.7
