@@ -71,11 +71,12 @@ See the `--help` flag for other options. The library is designed to act idempote
 # Installation
 
 ```
-composer.phar require mfn/cakephp2-magic-properties 0.0.7
+composer.phar require mfn/cakephp2-magic-properties 0.0.8
 ```
 
 # TODOs / Ideas
 - Support for Tests?
 - Ensure we're working with multi-line php doc comment, otherwise treat as there is none
+- Support belongsTo, hasMany in Models
 
 © Markus Fischer <markus@fischer.name>

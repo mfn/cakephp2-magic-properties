@@ -1,6 +1,6 @@
 #!/usr/bin/env php
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../bootstrap.php';
 use Mfn\CakePHP2\MagicProperty\ClassVisitor;
 use Mfn\CakePHP2\MagicProperty\PropertyVisitor;
 use Mfn\CakePHP2\MagicProperty\ClassTransformer;

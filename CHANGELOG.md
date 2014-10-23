@@ -1,5 +1,8 @@
 # CakePHP2 magic properties CHANGELOG
 
+### 0.0.8 - 23th October 2014
+- Fixed locating composer autoload
+
 ### 0.0.7 - 14th September 2014
 - Added
   - Support for models in shells
