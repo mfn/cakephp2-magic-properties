@@ -114,7 +114,6 @@ foreach ($files as $file) {
   $code = file($file);
   $parser = new Parser(new Lexer());
   $tree = $parser->parse(join('', $code));
-  $classVisitor->reset();
   $traverser->traverse($tree);
   $classesInFile = $classVisitor->getClasses();
   foreach ($classesInFile as $class) {

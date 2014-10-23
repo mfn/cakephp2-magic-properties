@@ -45,14 +45,12 @@ class ClassVisitor extends NodeVisitorAbstract {
    */
   private $classes = [];
 
-  public function __construct() {
-    $this->reset();
-  }
-
   /**
    * Resets the internal state
+   *
+   * @param array $nodes
    */
-  public function reset() {
+  public function beforeTraverse(array $nodes) {
     $this->classes = [];
   }
 
