@@ -32,6 +32,7 @@ use PhpParser\Parser;
  * @author Markus Fischer <markus@fischer.name>
  */
 class PropertyVisitorTest extends \PHPUnit_Framework_TestCase {
+
   /** @var NodeTraverser $traverser */
   private $traverser = NULL;
   /** @var PropertyVisitor $visitor */

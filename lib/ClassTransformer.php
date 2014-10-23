@@ -35,6 +35,7 @@ use PhpParser\Node\Stmt\Property;
  * @author Markus Fischer <markus@fischer.name>
  */
 class ClassTransformer {
+
   /**
    * Includes extra empty line for space -> deliberately!
    */

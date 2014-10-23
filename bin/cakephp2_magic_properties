@@ -1,14 +1,38 @@
 #!/usr/bin/env php
 <?php
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Markus Fischer <markus@fischer.name>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 require_once __DIR__ . '/../bootstrap.php';
+use Mfn\CakePHP2\MagicProperty\ClassTransformer;
 use Mfn\CakePHP2\MagicProperty\ClassVisitor;
 use Mfn\CakePHP2\MagicProperty\PropertyVisitor;
-use Mfn\CakePHP2\MagicProperty\ClassTransformer;
 use PhpParser\Lexer;
 use PhpParser\NodeTraverser;
 use PhpParser\Parser;
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
+
 ini_set('memory_limit', -1);
 # minimal error2exception handler
 set_error_handler(function ($errno, $errstr, $errfile, $errline, $errcontext) {
@@ -51,7 +75,7 @@ $operands = $opts->getOperands();
 if (count($operands) === 0) {
   $usage('You must provide at least a file/directory to scan');
 }
-$fnScanDir = function($dir) {
+$fnScanDir = function ($dir) {
   $files = [];
   $iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
   /** @var $file SplFileInfo */
@@ -115,8 +139,8 @@ foreach ($files as $file) {
     # Remember for next pass
     $classes[$class->name] = [
       'class' => $class,
-      'file' => $file,
-      'code' => $code,
+      'file'  => $file,
+      'code'  => $code,
     ];
   }
 }
@@ -127,7 +151,7 @@ if (empty($classes)) {
   echo 'No classes found' . PHP_EOL;
   exit(1);
 }
-$fnFindTopAncestor = function($className) use($classes) {
+$fnFindTopAncestor = function ($className) use ($classes) {
   while (isset($classes[$className])) {
     $className = $classes[$className]['class']->extends->toString();
   }
@@ -139,7 +163,7 @@ foreach ($classes as $className => $classData) {
   switch ($fnFindTopAncestor($className)) {
     case 'Controller':
       $propertyVisitor->reset();
-      $traverser->traverse( [ $classData['class'] ] );
+      $traverser->traverse([$classData['class']]);
       $transformedSource = ClassTransformer::apply(
         $classData['code'],
         $propertyVisitor->getClasses(),
@@ -149,7 +173,7 @@ foreach ($classes as $className => $classData) {
       break;
     case 'Helper':
       $propertyVisitor->reset();
-      $traverser->traverse( [ $classData['class'] ] );
+      $traverser->traverse([$classData['class']]);
       $transformedSource = ClassTransformer::apply(
         $classData['code'],
         $propertyVisitor->getClasses(),
@@ -159,7 +183,7 @@ foreach ($classes as $className => $classData) {
       break;
     case 'Shell':
       $propertyVisitor->reset();
-      $traverser->traverse( [ $classData['class'] ] );
+      $traverser->traverse([$classData['class']]);
       $transformedSource = ClassTransformer::apply(
         $classData['code'],
         $propertyVisitor->getClasses(),
@@ -169,7 +193,7 @@ foreach ($classes as $className => $classData) {
       break;
     case 'Model':
       $propertyVisitor->reset();
-      $traverser->traverse( [ $classData['class'] ] );
+      $traverser->traverse([$classData['class']]);
       $transformedSource = ClassTransformer::apply(
         $classData['code'],
         $propertyVisitor->getClasses(),

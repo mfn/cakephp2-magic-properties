@@ -23,8 +23,10 @@
  * THE SOFTWARE.
  */
 namespace Mfn\CakePHP2\MagicProperty;
+
 /**
  * @author Markus Fischer <markus@fischer.name>
  */
 class Exception extends \Exception {
+
 }
