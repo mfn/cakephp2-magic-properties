@@ -168,6 +168,10 @@ EOF;
               }
             }
             break;
+          case 'belongsTo':
+          case 'hasAndBelongsToMany':
+          case 'hasMany':
+          case 'hasOne':
           case 'uses':
             foreach ($symbols as $symbol) {
               # Extract only class name part if contains
@@ -195,7 +199,7 @@ EOF;
         return $carry + $item['replaceNumLines'];
       }, 0);
       $insertions[$phpDoc->getLine() - 1 + $alreadyAddedLines] = [
-        'doc' => $phpDoc,
+        'doc'             => $phpDoc,
         'replaceNumLines' => $phpDocNumLinesInSource
       ];
     }

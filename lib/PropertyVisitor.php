@@ -26,7 +26,11 @@ class PropertyVisitor extends NodeVisitorAbstract {
    * @var string[]
    */
   public static $specialProperties = [
+    'belongsTo',
     'components',
+    'hasAndBelongsToMany',
+    'hasMany',
+    'hasOne',
     'helpers',
     'uses',
   ];

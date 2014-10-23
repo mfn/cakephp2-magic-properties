@@ -167,10 +167,20 @@ foreach ($classes as $className => $classData) {
         $removeProperties
       );
       break;
+    case 'Model':
+      $propertyVisitor->reset();
+      $traverser->traverse( [ $classData['class'] ] );
+      $transformedSource = ClassTransformer::apply(
+        $classData['code'],
+        $propertyVisitor->getClasses(),
+        ['belongsTo', 'hasOne', 'hasMany', 'hasAndBelongsToMany'],
+        $removeProperties
+      );
+      break;
     default:
       # ignored
       if (!$opts['quiet']) {
-        echo "Ignoring $fileName , not a Controller or Helper" . PHP_EOL;
+        echo "Ignoring $fileName , not a recognized class" . PHP_EOL;
       }
       goto nextIteration;
   }
