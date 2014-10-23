@@ -3,6 +3,8 @@
 ### dev-master
 - Added
   - Support for special properties on `Model`
+- Internal
+  - Switched to symfony/console
 
 ### 0.0.8 - 23th October 2014
 - Fixed locating composer autoload
