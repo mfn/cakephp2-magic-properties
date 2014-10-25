@@ -1,10 +1,14 @@
 # CakePHP2 magic properties CHANGELOG
 
-### dev-master
+### 0.0.9 - 25 October 2014
 - Added
-  - Support for special properties on `Model`
+  - Support for special properties on `Component` and `Model`
+  - Support for running as phing task
+  - Support single-line doc comments; they will turned into multi-line
 - Internal
   - Switched to symfony/console
+  - Rewrote core mechanics to be used as library; evident now as we've a console
+    as well as a phing task runner.
 
 ### 0.0.8 - 23th October 2014
 - Fixed locating composer autoload

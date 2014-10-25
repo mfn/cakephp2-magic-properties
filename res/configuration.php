@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 /**
  * The MIT License (MIT)
@@ -23,19 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-use Mfn\CakePHP2\MagicProperty\Runner\SymfonyCommandMagic;
-use Symfony\Component\Console\Application;
 
-require_once __DIR__ . '/../bootstrap.php';
+/*
+ * This configuration maps a top level class name (Controller) to one ore more
+ * properties ('components', 'uses') and provides a callback how to transforme
+ * a found symbol (e.g. convert 'Foo' into 'FooComponent')
+ */
 
-ini_set('memory_limit', -1);
-# minimal error2exception handler
-set_error_handler(function ($errno, $errstr, $errfile, $errline, $errcontext) {
-  $msg = "$errstr in $errfile line $errline";
-  throw new \RuntimeException($msg, $errno);
-});
+$noTransform = function ($sym) { return $sym; };
 
-$app = new Application();
-$app->add($command = new SymfonyCommandMagic());
-$app->setDefaultCommand($command->getName());
-exit($app->run());
+return [
+  'Controller' => [
+    'components' => function ($sym) { return $sym . 'Component'; },
+    'uses'       => $noTransform,
+  ],
+  'Component' => [
+    'components' => function ($sym) { return $sym . 'Component'; },
+  ],
+  'Helper'     => [
+    'components' => function ($sym) { return $sym . 'Component'; },
+    'helpers'    => function ($sym) { return $sym . 'Helper'; },
+    'uses'       => $noTransform,
+  ],
+  'Model'      => [
+    'belongsTo'           => $noTransform,
+    'hasAndBelongsToMany' => $noTransform,
+    'hasOne'              => $noTransform,
+    'hasMany'             => $noTransform,
+  ],
+  'Shell'      => [
+    'uses' => $noTransform,
+  ]
+];

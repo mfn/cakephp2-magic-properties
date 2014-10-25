@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 /**
  * The MIT License (MIT)
@@ -23,19 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-use Mfn\CakePHP2\MagicProperty\Runner\SymfonyCommandMagic;
-use Symfony\Component\Console\Application;
+namespace Mfn\CakePHP2\MagicProperty\Logger;
 
-require_once __DIR__ . '/../bootstrap.php';
+use Symfony\Component\Console\Output\OutputInterface;
 
-ini_set('memory_limit', -1);
-# minimal error2exception handler
-set_error_handler(function ($errno, $errstr, $errfile, $errline, $errcontext) {
-  $msg = "$errstr in $errfile line $errline";
-  throw new \RuntimeException($msg, $errno);
-});
+class SymfonyConsoleOutput extends Logger {
 
-$app = new Application();
-$app->add($command = new SymfonyCommandMagic());
-$app->setDefaultCommand($command->getName());
-exit($app->run());
+  /** @var OutputInterface */
+  private $output;
+
+  public function __construct(OutputInterface $output) {
+    $this->output = $output;
+  }
+
+  /**
+   * The actual implementation to perform the logging action
+   *
+   * The level is always int; if you want a string representation use
+   * levelToInt().
+   *
+   * If you want to interpolate the context, use interpolateContext()
+   *
+   * @param int $level
+   * @param string $message
+   * @param array $context
+   * @return NULL
+   */
+  protected function realLog($level, $message, array $context = []) {
+    $message = self::interpolateContext($message, $context);
+    $this->output->writeln(
+      sprintf('[%s] %s',
+        self::levelToString($level),
+        $message
+      ),
+      OutputInterface::OUTPUT_RAW
+    );
+    return NULL;
+  }
+}

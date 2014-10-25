@@ -35,43 +35,27 @@ use PhpParser\NodeVisitorAbstract;
 /**
  * A visitor for PhpParser\NodeTraverser
  *
- * Extracts all properties from all classes from \PhpParser\NodeTraverser .
+ * After instantiation, use setProperties() to set which ones to collect during
+ * traversal.
+ *
+ * Extracts the requested properties from all classes from \PhpParser\NodeTraverser .
  *
  * Use getClasses() to retrieve a mapping of class to property matching.
- *
- * Use reset() to re-use this visitor.
  *
  * @author Markus Fischer <markus@fischer.name>
  */
 class PropertyVisitor extends NodeVisitorAbstract {
 
+  /** @var string[] */
+  private $properties = [];
+
   /**
-   * Special properties used by CakePHP2
-   * @var string[]
-   */
-  public static $specialProperties = [
-    'belongsTo',
-    'components',
-    'hasAndBelongsToMany',
-    'hasMany',
-    'hasOne',
-    'helpers',
-    'uses',
-  ];
-  /**
-   * Maps classes to their matched properties
+   * Maps classes to their matched properties to their matches symbols
    * @type SimpleOrderedMap
    */
   private $classes = NULL;
 
-  public function __construct() {
-    $this->reset();
-  }
-
-  /**
-   * Resets the internal state of found matches so the visitor can be reused.
-   */
-  public function reset() {
+  public function beforeTraverse(array $nodes) {
     $this->classes = new SimpleOrderedMap();
   }
 
@@ -89,43 +73,75 @@ class PropertyVisitor extends NodeVisitorAbstract {
         continue;
       }
       foreach ($stmt->props as $prop) {
-        if (!in_array($prop->name, self::$specialProperties, true)) {
+        if (!in_array($prop->name, $this->properties, true)) {
           continue;
         }
         if ($properties->exists($prop)) {
-          throw new Exception(
-            "Property {$prop->name} already exists");
+          throw new Exception("Property {$prop->name} already exists");
         }
         if (!($prop->default instanceof Array_)) {
           continue;
         }
-        $extracted = self::arrayExtractItems($prop->default);
-        if (empty($extracted)) {
+        $symbols = self::arrayExtractItems($prop->default);
+        if (empty($symbols)) {
           continue;
         }
-        sort($extracted);
-        $properties->add($prop, $extracted);
+        asort($symbols);
+        $properties->add($prop, $symbols);
       }
     }
     $this->classes->add($node, $properties);
   }
 
+  /**
+   * Returns a mapping of Cakes injected properties and their types.
+   *
+   * @param Array_ $expr
+   * @return string[] Mapping of symbols to their types
+   */
   static private function arrayExtractItems(Array_ $expr) {
-    $extracted = [];
+    $symbols = [];
     foreach ($expr->items as $item) {
-      # Components can either be listed by their names (have a value in the hash)
+
+      # Symbols can either be listed by their names (have a value in the hash)
       if (NULL === $item->key && $item->value instanceof String) {
-        $extracted[] = $item->value->value;
+        $symbols[$item->value->value] = $item->value->value;
         continue;
       }
+
       # or can have configuration by which the name is in the key and the
       # value is a configuration
       if ($item->key instanceof String && $item->value instanceof Array_) {
-        $extracted[] = $item->key->value;
+        # If the array has a className property, derive class name from it
+        $className = self::extractClassNameValue($item->value->items);
+        if (NULL === $className) {
+          $className = $item->key->value;
+        }
+        $symbols[$item->key->value] = $className;
         continue;
       }
     }
-    return $extracted;
+    return $symbols;
+  }
+
+  /**
+   * @param array $items
+   * @return null|string
+   */
+  static private function extractClassNameValue(array $items) {
+    foreach ($items as $item) {
+      if (!isset($item->key)) {
+        continue;
+      }
+      if ($item->key->value !== 'className') {
+        continue;
+      }
+      if (!($item->value instanceof String)) {
+        continue;
+      }
+      return $item->value->value;
+    }
+    return NULL;
   }
 
   /**
@@ -133,5 +149,21 @@ class PropertyVisitor extends NodeVisitorAbstract {
    */
   public function getClasses() {
     return $this->classes;
+  }
+
+  /**
+   * @return \string[]
+   */
+  public function getProperties() {
+    return $this->properties;
+  }
+
+  /**
+   * @param \string[] $properties
+   * @return $this
+   */
+  public function setProperties($properties) {
+    $this->properties = $properties;
+    return $this;
   }
 }

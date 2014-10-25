@@ -22,6 +22,7 @@
         "php": ">=5.4.0",
         "nikic/php-parser": "1.0.0",
         "mfn/util-simpleorderedmap": "0.0.1",
+        "psr/log": "1.0.0",
         "symfony/console" : "2.5.5"
     },
     "autoload": {

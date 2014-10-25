@@ -57,11 +57,14 @@ class PropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       '  var $uses = ["Foo", "Bar"];' . PHP_EOL,
       '}' . PHP_EOL,
     ];
+    $properties = ['uses' => function ($sym) { return $sym; }];
     $tree = $this->parser->parse(join('', $sourceIn));
+    $this->visitor->setProperties(array_keys($properties));
     $this->traverser->traverse($tree);
     $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
-      $this->visitor->getClasses()
+      $this->visitor->getClasses(),
+      $properties
     );
     $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
@@ -83,11 +86,14 @@ class PropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       '  var $helpers = ["Foo", "Bar"];' . PHP_EOL,
       '}' . PHP_EOL,
     ];
+    $properties = ['helpers' => function ($sym) { return $sym . 'Helper'; }];
     $tree = $this->parser->parse(join('', $sourceIn));
+    $this->visitor->setProperties(array_keys($properties));
     $this->traverser->traverse($tree);
     $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
-      $this->visitor->getClasses()
+      $this->visitor->getClasses(),
+      $properties
     );
     $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
@@ -109,11 +115,14 @@ class PropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       '  var $components = ["Foo", "Bar"];' . PHP_EOL,
       '}' . PHP_EOL,
     ];
+    $properties = ['components' => function ($sym) { return $sym . 'Component'; }];
     $tree = $this->parser->parse(join('', $sourceIn));
+    $this->visitor->setProperties(array_keys($properties));
     $this->traverser->traverse($tree);
     $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
-      $this->visitor->getClasses()
+      $this->visitor->getClasses(),
+      $properties
     );
     $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
@@ -138,12 +147,14 @@ class PropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       '  var $components = ["Kansas"];' . PHP_EOL,
       '}' . PHP_EOL,
     ];
+    $properties = ['components', 'helpers', 'uses'];
     $tree = $this->parser->parse(join('', $sourceIn));
+    $this->visitor->setProperties($properties);
     $this->traverser->traverse($tree);
     $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
       $this->visitor->getClasses(),
-      ['helpers']
+      ['helpers' => function ($sym) { return $sym . 'Helper'; }]
     );
     $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
@@ -165,11 +176,14 @@ class PropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       '  var $components = ["Foo", "Bar" => ["Baz"] ];' . PHP_EOL,
       '}' . PHP_EOL,
     ];
+    $properties = ['components' => function ($sym) { return $sym . 'Component'; }];
     $tree = $this->parser->parse(join('', $sourceIn));
+    $this->visitor->setProperties(array_keys($properties));
     $this->traverser->traverse($tree);
     $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
-      $this->visitor->getClasses()
+      $this->visitor->getClasses(),
+      $properties
     );
     $this->assertSame($sourceOutExpected, $sourceOutActual);
   }
@@ -194,12 +208,14 @@ class PropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       '  var $uses = ["Bar"];' . PHP_EOL,
       '}' . PHP_EOL,
     ];
+    $properties = ['uses' => function ($sym) { return $sym; }];
     $tree = $this->parser->parse(join('', $sourceIn));
+    $this->visitor->setProperties(array_keys($properties));
     $this->traverser->traverse($tree);
     $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
       $this->visitor->getClasses(),
-      [],
+      $properties,
       true
     );
     $this->assertSame($sourceOutExpected, $sourceOutActual);
@@ -226,13 +242,110 @@ class PropertyVisitorTest extends \PHPUnit_Framework_TestCase {
       '  var $uses = ["Foo", "Bar"];' . PHP_EOL,
       '}' . PHP_EOL,
     ];
+    $properties = ['uses' => function ($sym) { return $sym; }];
     $tree = $this->parser->parse(join('', $sourceIn));
+    $this->visitor->setProperties(array_keys($properties));
     $this->traverser->traverse($tree);
     $sourceOutActual = ClassTransformer::apply(
       $sourceIn,
       $this->visitor->getClasses(),
-      [],
+      $properties,
       true
+    );
+    $this->assertSame($sourceOutExpected, $sourceOutActual);
+  }
+
+  public function testTransformerPropertyHasDifferentClassName() {
+    $sourceIn = [
+      '<?php' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $belongsTo = [' . PHP_EOL,
+      '    \'Bar\' => [' . PHP_EOL,
+      '      \'className\' => \'Baz\',' . PHP_EOL,
+      '    ]' . PHP_EOL,
+      '  ];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $sourceOutExpected = [
+      '<?php' . PHP_EOL,
+      '/**' . PHP_EOL,
+      ' * @property Baz $Bar' . PHP_EOL,
+      ' */' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $belongsTo = [' . PHP_EOL,
+      '    \'Bar\' => [' . PHP_EOL,
+      '      \'className\' => \'Baz\',' . PHP_EOL,
+      '    ]' . PHP_EOL,
+      '  ];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $properties = ['belongsTo' => function ($sym) { return $sym; }];
+    $tree = $this->parser->parse(join('', $sourceIn));
+    $this->visitor->setProperties(array_keys($properties));
+    $this->traverser->traverse($tree);
+    $sourceOutActual = ClassTransformer::apply(
+      $sourceIn,
+      $this->visitor->getClasses(),
+      $properties
+    );
+    $this->assertSame($sourceOutExpected, $sourceOutActual);
+  }
+
+  public function testTransformerSingleLineDocComment() {
+    $sourceIn = [
+      '<?php' . PHP_EOL,
+      '/** */' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $uses = [\'Bar\'];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $sourceOutExpected = [
+      '<?php' . PHP_EOL,
+      '/** ' . PHP_EOL,
+      ' * @property Bar $Bar' . PHP_EOL,
+      ' */' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $uses = [\'Bar\'];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $properties = ['uses' => function ($sym) { return $sym; }];
+    $tree = $this->parser->parse(join('', $sourceIn));
+    $this->visitor->setProperties(array_keys($properties));
+    $this->traverser->traverse($tree);
+    $sourceOutActual = ClassTransformer::apply(
+      $sourceIn,
+      $this->visitor->getClasses(),
+      $properties
+    );
+    $this->assertSame($sourceOutExpected, $sourceOutActual);
+  }
+
+  public function testTransformerPluginNames() {
+    $sourceIn = [
+      '<?php' . PHP_EOL,
+      '/**' . PHP_EOL,
+      ' */' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $uses = [\'Bar.Baz\'];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $sourceOutExpected = [
+      '<?php' . PHP_EOL,
+      '/**' . PHP_EOL,
+      ' * @property Baz $Baz' . PHP_EOL,
+      ' */' . PHP_EOL,
+      'class Foo {' . PHP_EOL,
+      '  var $uses = [\'Bar.Baz\'];' . PHP_EOL,
+      '}' . PHP_EOL,
+    ];
+    $properties = ['uses' => function ($sym) { return $sym; }];
+    $tree = $this->parser->parse(join('', $sourceIn));
+    $this->visitor->setProperties(array_keys($properties));
+    $this->traverser->traverse($tree);
+    $sourceOutActual = ClassTransformer::apply(
+      $sourceIn,
+      $this->visitor->getClasses(),
+      $properties
     );
     $this->assertSame($sourceOutExpected, $sourceOutActual);
   }

@@ -52,38 +52,44 @@ EOF;
    * special CakePHP2 magic properties.
    *
    * $classes maps parsed PHP classes to properties and each property contains
-   * the list of strings contained in it.
+   * a mapping of injected property names to their class types
    *
    * This nodes/statement from PhpParser also contain additional information
    * about the PHPDOC and in which lines in the source those elements are.
    * This information is used to either create a new PHPDOC or change an
    * existing one to contain the magic properties.
    *
+   * Note: it may seem redundant that the $classes->property->symbol mapping
+   * already has all properties and a separate $properties list is required.
+   * However during collecting a property we don't know yet which top level
+   * class it is in, i.e. which properties apply to the current class.
+   * This is solves here insofar the top level class check happened (outside)
+   * already and thus we get a specific list of $properties to document.
+   *
    * @param array $code The code of the PHP file as returned by the file()
-   *                    command, i.e. every line includes the EOL.
+   *                    command, i.e. an every with every line in the file
+   *                    including EOL.
    * @param SimpleOrderedMap $classes Mapping of classes to the collected
-   *                                  property information
-   * @param string[] $properties Optional: Name the properties to write to the
-   *  PHPDOC in in this class; see PropertyVisitor::$specialProperties
-   *  for available names. By default all recognized properties will be
-   *  processed. This may not be always desirable. Controllers e.g. don't
-   *  have the $helpers property injected into themselves.
+   *                                  property which maps to a list of symbols.
+   * @param string[] $properties Name the properties whose symbols should be
+   *                              written to PHPDOC.
    * @param bool $removeUnknownProperties Removes all other properties (first)
-   *                                      and then adds the found ones.
+   *                                      and then adds the found ones. This may
+   *                                      remove properties which have been
+   *                                      manually added so use with care.
    * @throws Exception
    * @throws SimpleOrderedMapException
-   * @return array Returns the possible modified PHP source code.
+   * @return array Returns the (possible) modified PHP source code.
    */
   static public function apply(array $code, SimpleOrderedMap $classes,
-                               array $properties = [],
+                               array $properties,
                                $removeUnknownProperties = false) {
     if (empty($code)) {
       return $code; # nothing to do
     }
-    if (empty($properties)) {
-      $properties = PropertyVisitor::$specialProperties;
-    }
+
     $insertions = []; # record at which line what kind of insertions will happen
+
     /** @var Class_ $class */
     foreach ($classes->keys() as $class) {
       $currentInsertions = 0; # keep count how many properties == lines we've added
@@ -91,15 +97,37 @@ EOF;
       $phpDoc = self::getLastPhpDocComment($class);
       $phpDocNumLinesInSource = 0;
       $docIndent = '';
-      # TODO: ensure we've a multi-line php doc comment, otherwise treat as there is none
       if ($phpDoc instanceof Doc) {
         # get indentation from existing phpdoc
         $text = $phpDoc->getText();
         if (preg_match(self::RE_INDENT, $text, $m)) {
           $docIndent = $m['indent'];
         }
-        $lines = self::splitStringIntoLines($text);
-        $phpDocNumLinesInSource = count($lines);
+
+        # If it's a single line comment, we've to break it up
+        if (!preg_match('/\R/', $text)) {
+
+          $textNoEndComment = preg_replace(';\*/\s*;', '', $text);
+          # If there was no change to the text, we couldn't remove the end of
+          # comment we expected to be there; that's rather unexpected
+          if ($text === $textNoEndComment) {
+            throw new Exception(
+              'Unable to remove end doc comment marker \'*/\' from single line comment');
+          }
+          # Since we've add a new line we need to know the files EOL
+          $eol = self::extractEol(reset($code));
+          $text = $textNoEndComment . $eol . $docIndent . ' */';
+          $phpDoc->setText($text);
+
+          $lines = self::splitStringIntoLines($text);
+          $phpDocNumLinesInSource = 1; # hardcoded because we know
+
+        } else {
+
+          $lines = self::splitStringIntoLines($text);
+          $phpDocNumLinesInSource = count($lines);
+
+        }
         if ($removeUnknownProperties) {
           # Remove every line already containing a @property statement
           foreach ($lines as $i => $line) {
@@ -138,57 +166,22 @@ EOF;
       $currentProperties = $classes->get($class);
       /** @var Property $property */
       foreach ($currentProperties->keys() as $property) {
-        $symbols = $currentProperties->get($property);
-        if (!in_array($property->name, $properties)) {
+        if (!in_array($property->name, array_keys($properties))) {
           continue;
         }
-        switch ($property->name) {
-          case 'components':
-            foreach ($symbols as $symbol) {
-              # Extract only class name part if contains
-              if (preg_match('/\.(?<symbol>[^\.]+)$/', $symbol, $m)) {
-                $symbol = $m['symbol'];
-              }
-              if (true === self::addPropertyIfNotExists($phpDoc,
-                  $symbol . 'Component', $symbol, $docIndent)
-              ) {
-                $currentInsertions++;
-              }
-            }
-            break;
-          case 'helpers':
-            foreach ($symbols as $symbol) {
-              # Extract only class name part if contains
-              if (preg_match('/\.(?<symbol>[^\.]+)$/', $symbol, $m)) {
-                $symbol = $m['symbol'];
-              }
-              if (true === self::addPropertyIfNotExists($phpDoc,
-                  $symbol . 'Helper', $symbol, $docIndent)
-              ) {
-                $currentInsertions++;
-              }
-            }
-            break;
-          case 'belongsTo':
-          case 'hasAndBelongsToMany':
-          case 'hasMany':
-          case 'hasOne':
-          case 'uses':
-            foreach ($symbols as $symbol) {
-              # Extract only class name part if contains
-              if (preg_match('/\.(?<symbol>[^\.]+)$/', $symbol, $m)) {
-                $symbol = $m['symbol'];
-              }
-              if (true === self::addPropertyIfNotExists(
-                  $phpDoc, $symbol, $symbol, $docIndent)
-              ) {
-                $currentInsertions++;
-              }
-            }
-            break;
-          default:
-            throw new Exception(
-              "Unknown special propert '{$property->name}'");
+
+        $symbols = $currentProperties->get($property);
+
+        foreach ($symbols as $symbol => $type) {
+          # Extract only class name part (i.e. throw away name of plugins)
+          $symbol = preg_replace('/.*\.([^\.]+)$/', '$1', $symbol);
+          $type = preg_replace('/.*\.([^\.]+)$/', '$1', $type);
+
+          $type = $properties[$property->name]($type);
+
+          if (self::addPropertyIfNotExists($phpDoc, $type, $symbol, $docIndent)) {
+            $currentInsertions++;
+          }
         }
       }
       if ($currentInsertions === 0) {

@@ -22,49 +22,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-namespace Mfn\CakePHP2\MagicProperty;
-
-use PhpParser\Node;
-use PhpParser\Node\Stmt\Class_;
-use PhpParser\NodeVisitorAbstract;
+namespace Mfn\CakePHP2\MagicProperty\Logger;
 
 /**
- * A visitor for PhpParser\NodeTraverser
- *
- * Extracts all classes when running through \PhpParser\NodeTraverser .
- *
- * Use getClasses() to retrieve them.
- *
- * @author Markus Fischer <markus@fischer.name>
+ * Translates our log calls to Phing system.
  */
-class ClassVisitor extends NodeVisitorAbstract {
+class Phing extends Logger {
 
-  /**
-   * Classes found
-   * @type Class_
-   */
-  private $classes = [];
+  /** @var \Task */
+  private $task;
 
-  /**
-   * Resets the internal state
-   *
-   * @param array $nodes
-   */
-  public function beforeTraverse(array $nodes) {
-    $this->classes = [];
+  public function __construct(\Task $phingProject) {
+    $this->task = $phingProject;
   }
 
-  public function enterNode(Node $node) {
-    if (!($node instanceof Class_)) {
-      return;
+  public function log($level, $message, array $context = []) {
+    $level = self::ensureLevelIsvalidInt($level);
+    # we let phing make the decisions which levels to log and which not
+    $this->realLog($level, $message);
+  }
+
+
+  protected function realLog($level, $message, array $context = []) {
+    $message = self::interpolateContext($message, $context);
+    switch ($level) {
+      case self::DEBUG:
+        $level = \Project::MSG_DEBUG;
+        break;
+      case self::INFO:
+        $level = \Project::MSG_VERBOSE;
+        break;
+      case self::NOTICE:
+        $level = \Project::MSG_VERBOSE;
+        break;
+      case self::WARNING:
+        $level = \Project::MSG_WARN;
+        break;
+      case self::ERROR:
+      case self::CRITICAL:
+      case self::ALERT:
+      case self::EMERGENCY:
+        $level = \Project::MSG_ERR;
+        break;
+      default:
+        $level = \Project::MSG_INFO;
     }
-    $this->classes[] = $node;
-  }
-
-  /**
-   * @return Class_[]
-   */
-  public function getClasses() {
-    return $this->classes;
+    $this->task->log($message, $level);
+    return NULL;
   }
 }
