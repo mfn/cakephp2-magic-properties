@@ -110,7 +110,7 @@ A phing task is also provided for better phing integration. Use `taskdef` to def
   </target>
 ```
 
-The task also supports the `configFile` attribute.
+The task also supports the `configFile` and `removeUnknownProperties` attributes.
 
 Note: due the use of namespaces this will only work properly if phing is used via composer too.
 
@@ -132,7 +132,7 @@ The closure approach is required because e.g. `helpers` and `components` have di
 # Installation
 
 ```
-composer.phar require mfn/cakephp2-magic-properties 0.0.9
+composer.phar require mfn/cakephp2-magic-properties 0.1.0
 ```
 
 # TODOs / Ideas

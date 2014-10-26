@@ -53,6 +53,8 @@ class PhingTask extends \Task {
   private $filesets;
   /** @var \PhingFile */
   private $configFile = NULL;
+  /** @var bool */
+  private $removeUnknownProperties = false;
 
   public function addFileSet(\FileSet $fs) {
     $this->filesets[] = $fs;
@@ -68,6 +70,8 @@ class PhingTask extends \Task {
     if (NULL !== $this->getConfigFile()) {
       $project->setConfigurationFromFile($this->getConfigFile());
     }
+
+    $project->setRemoveUnknownProperties($this->removeUnknownProperties);
 
     # Add files
     foreach ($this->filesets as $fs) {
@@ -99,6 +103,22 @@ class PhingTask extends \Task {
    */
   public function setConfigFile($configFile) {
     $this->configFile = $configFile;
+    return $this;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getRemoveUnknownProperties() {
+    return $this->removeUnknownProperties;
+  }
+
+  /**
+   * @param boolean $remove
+   * @return $this
+   */
+  public function setRemoveUnknownProperties($remove) {
+    $this->removeUnknownProperties = $remove;
     return $this;
   }
 }

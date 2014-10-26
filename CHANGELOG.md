@@ -1,5 +1,9 @@
 # CakePHP2 magic properties CHANGELOG
 
+### 0.1.0 - 26 October 2014
+- Added
+  - phing task supports the `removeUnknownProperties` attribute now
+
 ### 0.0.9 - 25 October 2014
 - Added
   - Support for special properties on `Component` and `Model`
