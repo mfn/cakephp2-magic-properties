@@ -4,7 +4,7 @@ Homepage: https://github.com/mfn/cakephp2-magic-properties
 
 # Blurb
 
-When working with [CakePHP2](http://cakephp.org/), dependency injection happens via magic properties like `uses`, `helpers`, et.
+When working with [CakePHP2](http://cakephp.org/), dependency injection happens via magic properties like `uses`, `helpers`, etc.
 
 Unfortunately not many editors/IDEs are capable of understanding this special syntax and thus almost none provide autocompletion for the resulting magic properties.
 
@@ -19,6 +19,8 @@ This code uses the excellent [PhpParser library](https://github.com/nikic/PHP-Pa
 - `Controller`
   - `components`
   - `uses`
+- `Component`
+  - `components`
 - `Helper`
   - `components`
   - `helpers`
@@ -38,9 +40,13 @@ For details please see `res/configuration.php`.
 # Usage
 
 `cakephp2_magic_properties magic app/Controller/`
+
 or
+
 `cakephp2_magic_properties magic app/View/Helper/`
+
 or just your whole app (note that it will recursively parse all \*.php files):
+
 `cakephp2_magic_properties magic ../path/to/your/app/`
 
 It will convert:
@@ -81,7 +87,7 @@ AppController extends Controller {
   $component = ['Bar'];
 }
 ```
-However it may also cause to re-order your existing properties if none have really changed (because interally first all properties are always removed).
+Note: it may also cause to re-order your existing properties if none have really changed (because interally first all properties are always removed).
 
 See the `--help` flag for other options. The library is designed to act idempotent.
 
@@ -112,7 +118,8 @@ Note: due the use of namespaces this will only work properly if phing is used vi
 
 In `res/configuration.php` the projects default configuration is provided which all runners allow to override.
 
-This file contains the a mapping:
+This file contains the mapping:
+
 1. from "top level class" to properties
 2. and those properties map to a closure which transform the name of a injected virtual property
 
