@@ -41,7 +41,7 @@ class SymfonyCommandMagic extends Command {
       ->setName('magic')
       ->setDescription('Run the CakePHP2 magic property documentor')
       ->addOption('dry-run', 'd', InputOption::VALUE_NONE,
-        'Run without actually modifying file')
+        'Run without actually modifying files')
       ->addOption('remove', NULL, InputOption::VALUE_NONE,
         'Remove non-existent properties. Warning: this also removes unknown properties!')
       ->addOption('config', NULL, InputOption::VALUE_REQUIRED,
