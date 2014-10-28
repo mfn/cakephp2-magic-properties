@@ -1,5 +1,13 @@
 # CakePHP2 magic properties CHANGELOG
 
+### 0.1.1 - 28 October 2014
+- Added
+  - Use changed source files as optional control for shell/phing
+  - Added `dryRun` to phing task
+- Internal
+  - Removed getters on phing task (not needed ATM)
+  - Relax composer version restriction in favour of semver
+
 ### 0.1.0 - 26 October 2014
 - Added
   - phing task supports the `removeUnknownProperties` attribute now

@@ -110,7 +110,12 @@ A phing task is also provided for better phing integration. Use `taskdef` to def
   </target>
 ```
 
-The task also supports the `configFile` and `removeUnknownProperties` attributes.
+The following attributes are supported:
+- `configFile`<br>Path to configuration file, see next chapter
+- `dryRun`<br>Whether to actually write changes to files; defaults to `false` which means *overwrite* the files.
+  This is useful in combination with `haltOnSourcesChanged`
+- `haltOnSourcesChanged`<br>Whether to abort the build if any source files have been changed.
+- `removeUnknownProperties`<br>Whether to remove unknown `@property` declarations
 
 Note: due the use of namespaces this will only work properly if phing is used via composer too.
 
@@ -132,7 +137,7 @@ The closure approach is required because e.g. `helpers` and `components` have di
 # Installation
 
 ```
-composer.phar require mfn/cakephp2-magic-properties 0.1.0
+composer.phar require mfn/cakephp2-magic-properties 0.1.1
 ```
 
 # TODOs / Ideas

@@ -55,6 +55,10 @@ class PhingTask extends \Task {
   private $configFile = NULL;
   /** @var bool */
   private $removeUnknownProperties = false;
+  /** @var bool */
+  private $haltOnSourcesChanged = false;
+  /** @var bool */
+  private $dryRun = false;
 
   public function addFileSet(\FileSet $fs) {
     $this->filesets[] = $fs;
@@ -67,8 +71,8 @@ class PhingTask extends \Task {
 
     $project = new MagicProperty(new Phing($this));
 
-    if (NULL !== $this->getConfigFile()) {
-      $project->setConfigurationFromFile($this->getConfigFile());
+    if (NULL !== $this->configFile) {
+      $project->setConfigurationFromFile($this->configFile);
     }
 
     $project->setRemoveUnknownProperties($this->removeUnknownProperties);
@@ -87,14 +91,11 @@ class PhingTask extends \Task {
       }
     }
 
-    $project->applyMagic();
-  }
+    $sourcesChanged = $project->applyMagic();
 
-  /**
-   * @return \PhingFile
-   */
-  public function getConfigFile() {
-    return $this->configFile;
+    if ($this->haltOnSourcesChanged && $sourcesChanged > 0) {
+      throw new \BuildException($sourcesChanged . ' source files changed');
+    }
   }
 
   /**
@@ -107,18 +108,29 @@ class PhingTask extends \Task {
   }
 
   /**
-   * @return boolean
-   */
-  public function getRemoveUnknownProperties() {
-    return $this->removeUnknownProperties;
-  }
-
-  /**
    * @param boolean $remove
    * @return $this
    */
   public function setRemoveUnknownProperties($remove) {
     $this->removeUnknownProperties = $remove;
+    return $this;
+  }
+
+  /**
+   * @param boolean $haltOnSourcesChanged
+   * @return $this
+   */
+  public function setHaltOnSourcesChanged($haltOnSourcesChanged) {
+    $this->haltOnSourcesChanged = $haltOnSourcesChanged;
+    return $this;
+  }
+
+  /**
+   * @param boolean $dryRun
+   * @return $this
+   */
+  public function setDryRun($dryRun) {
+    $this->dryRun = $dryRun;
     return $this;
   }
 }

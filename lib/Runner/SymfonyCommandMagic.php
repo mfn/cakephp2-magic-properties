@@ -70,6 +70,8 @@ class SymfonyCommandMagic extends Command {
       $project->addSource($source);
     }
 
-    $project->applyMagic();
+    $sourcesChanged = $project->applyMagic();
+
+    return $sourcesChanged === 0 ? 0 : 1;
   }
 }

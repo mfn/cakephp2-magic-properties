@@ -137,8 +137,13 @@ class MagicProperty {
    * Perform the analysis for special properties and write them to the files.
    *
    * Use addSource() before calling this.
+   *
+   * @return int  Number of source files changed (does not necessarily mean they
+   *              have been actually modified in case dryRun if true)
    */
   public function applyMagic() {
+
+    $sourcesChanged = 0;
 
     # start processing
     $traverser = new NodeTraverser();
@@ -192,7 +197,7 @@ class MagicProperty {
 
     if (empty($classes)) {
       $this->logger->warning('No classes found');
-      return;
+      return $sourcesChanged;
     }
 
     $fnFindTopAncestor = function ($className) use ($classes) {
@@ -225,6 +230,8 @@ class MagicProperty {
         continue;
       }
 
+      $sourcesChanged++;
+
       if ($this->dryRun) {
         $this->logger->info('Dry-run, not writing changes to ' . $fileName);
         continue;
@@ -234,6 +241,8 @@ class MagicProperty {
 
       file_put_contents($fileName, $transformedSource);
     }
+
+    return $sourcesChanged;
   }
 
   /**
