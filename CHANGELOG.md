@@ -1,5 +1,9 @@
 # CakePHP2 magic properties CHANGELOG
 
+### 0.1.2 - 28 October 2014
+- Fixed
+  - dryRun on phing task actually did nothing
+
 ### 0.1.1 - 28 October 2014
 - Added
   - Use changed source files as optional control for shell/phing

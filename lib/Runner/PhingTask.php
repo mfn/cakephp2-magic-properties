@@ -76,6 +76,7 @@ class PhingTask extends \Task {
     }
 
     $project->setRemoveUnknownProperties($this->removeUnknownProperties);
+    $project->setDryRun($this->dryRun);
 
     # Add files
     foreach ($this->filesets as $fs) {
@@ -130,7 +131,7 @@ class PhingTask extends \Task {
    * @return $this
    */
   public function setDryRun($dryRun) {
-    $this->dryRun = $dryRun;
+    $this->dryRun = (bool) $dryRun;
     return $this;
   }
 }
