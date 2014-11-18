@@ -1,5 +1,9 @@
 # CakePHP2 magic properties CHANGELOG
 
+### 0.1.3 - 18 November 2014
+- Fixed
+ - regex for matching properties would improperly match
+
 ### 0.1.2 - 28 October 2014
 - Fixed
   - dryRun on phing task actually did nothing

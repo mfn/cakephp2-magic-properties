@@ -300,8 +300,8 @@ EOF;
     # split into lines but ensure we keep the existing line ending format
     $lines = self::splitStringIntoLines($text);
     # try to find the symbol we're going to add
-    $reSymMatch = '/\*\s*@property.*' .
-      preg_quote($type, '/') . '.*' .
+    $reSymMatch = '/\*\s*@property\s+' .
+      preg_quote($type, '/') . '\s+\$' .
       preg_quote($symbol, '/') . '/i';
     foreach ($lines as $line) {
       if (preg_match($reSymMatch, $line)) {
