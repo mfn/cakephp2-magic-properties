@@ -24,7 +24,7 @@
  */
 namespace Mfn\CakePHP2\MagicProperty;
 
-use Mfn\Util\SimpleOrderedMap;
+use Mfn\Util\Map\SimpleOrderedMap;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Scalar\String;

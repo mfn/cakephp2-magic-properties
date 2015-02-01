@@ -24,8 +24,8 @@
  */
 namespace Mfn\CakePHP2\MagicProperty;
 
-use Mfn\Util\SimpleOrderedMap;
-use Mfn\Util\SimpleOrderedMapException;
+use Mfn\Util\Map\SimpleOrderedMap;
+use Mfn\Util\Map\SimpleOrderedMapException;
 use PhpParser\Comment\Doc;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Property;
