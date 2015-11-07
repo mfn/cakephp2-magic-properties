@@ -1,7 +1,7 @@
 {
     "name": "mfn/cakephp2-magic-properties",
     "description": "Automatically add class documentation for CakePHP2 magic properties",
-    "type": "ibrary",
+    "type": "library",
     "keywords": [
         "cakephp2",
         "utility"
