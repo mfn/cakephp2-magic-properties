@@ -1,3 +1,9 @@
+# Abandoned
+
+This repository is archived, it served its purpose.
+
+---
+
 # Automatically add class documentation for CakePHP2 magic properties [ ![Travis Build Status](https://travis-ci.org/mfn/cakephp2-magic-properties.svg?branch=master)](https://travis-ci.org/mfn/cakephp2-magic-properties)
 
 Homepage: https://github.com/mfn/cakephp2-magic-properties
